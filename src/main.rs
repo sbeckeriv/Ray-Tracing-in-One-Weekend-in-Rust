@@ -1,4 +1,4 @@
-extern crate num;
+// extern crate num;
 extern crate image;
 
 use std::fs::File;
@@ -19,7 +19,6 @@ fn main() {
         let g = (image_y - 1 - y) as f32 / image_y as f32;
         let b = 0.2;
         let base = 255.99;
-        println!("{:?}", (x, image_y - 1 - y));
         *pixel = image::Rgba([(base * r) as u8, (base * g) as u8, (base * b) as u8, 0]);
     }
     // Save the image as “fractal.png”
