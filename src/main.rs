@@ -4,13 +4,30 @@ extern crate nalgebra as na;
 use na::Vec3;
 use std::fs::File;
 use std::path::Path;
+use nalgebra::Dot;
 mod ray;
 use ray::Ray;
+fn hit_sphere(center: &Vec3<f32>, radius: f32, ray: &Ray) -> bool {
+    let origin = ray.origin;
+    let direction = ray.direction;
+    let oc = origin - *center;
+    let a = direction.dot(&direction);
+    let b = 2.0 * oc.dot(&direction);
+    let c = oc.dot(&oc);
+    let discriminate = b * b - 4.0 * a * c;
+    println!("{:?} {},{},{}",discriminate,a,b,c);
+    discriminate > 0.0
+}
 
 fn color(ray: &ray::Ray) -> Vec3<f32> {
     let direction: Vec3<f32> = ray.direction;
-    let t = 0.5 * (direction.y + 1.0);
-    Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+    let sphere = Vec3::new(1.0,1.0,1.0);
+    if hit_sphere(&sphere, 5.5, ray){
+        Vec3::new(1.0,0.0,0.0)
+    }else{
+        let t = 0.5 * (direction.y + 1.0);
+        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+    }
 }
 
 fn main() {
