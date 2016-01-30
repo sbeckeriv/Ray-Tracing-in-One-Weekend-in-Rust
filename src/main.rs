@@ -1,10 +1,9 @@
-// extern crate num;
 extern crate image;
-
+extern crate nalgebra;
+extern crate nalgebra as na;
+use na::Vec3;
 use std::fs::File;
 use std::path::Path;
-
-use num::complex::Complex;
 
 fn main() {
     let image_x = 200;
@@ -15,11 +14,11 @@ fn main() {
 
     // Iterate over the coordiantes and pixels of the image
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-        let r = x as f32 / image_x as f32;
-        let g = (image_y - 1 - y) as f32 / image_y as f32;
-        let b = 0.2;
+        let col = Vec3::new(x as f32 / image_x as f32,
+                            (image_y - 1 - y) as f32 / image_y as f32,
+                            0.2);
         let base = 255.99;
-        *pixel = image::Rgba([(base * r) as u8, (base * g) as u8, (base * b) as u8, 0]);
+        *pixel = image::Rgba([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8, 0]);
     }
     // Save the image as “fractal.png”
     let ref mut fout = File::create(&Path::new("fractal.ppm")).unwrap();
