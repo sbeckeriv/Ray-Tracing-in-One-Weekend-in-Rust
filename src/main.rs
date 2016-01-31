@@ -13,16 +13,17 @@ fn hit_sphere(center: &Vec3<f32>, radius: f32, ray: &Ray) -> bool {
     let oc = origin - *center;
     let a = direction.dot(&direction);
     let b = 2.0 * oc.dot(&direction);
-    let c = oc.dot(&oc);
+    let c = oc.dot(&oc) - radius*radius;
     let discriminate = b * b - 4.0 * a * c;
-    println!("{:?} {},{},{}",discriminate,a,b,c);
+    //println!("{:?} {},{},{}",discriminate,a,b,c);
     discriminate > 0.0
 }
 
 fn color(ray: &ray::Ray) -> Vec3<f32> {
     let direction: Vec3<f32> = ray.direction;
-    let sphere = Vec3::new(1.0,1.0,1.0);
-    if hit_sphere(&sphere, 5.5, ray){
+    let sphere = Vec3::new(0.0,0.0,0.0-1.0);
+    if hit_sphere(&sphere, 0.5, ray){
+        println!("in hit sphsere");
         Vec3::new(1.0,0.0,0.0)
     }else{
         let t = 0.5 * (direction.y + 1.0);
