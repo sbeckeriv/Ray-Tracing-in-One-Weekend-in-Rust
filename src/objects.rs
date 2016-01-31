@@ -24,12 +24,9 @@ impl HitableList {
         let mut closest_so_far = t_max.clone();
         let mut last_hit: Option<HitRecord> = None;
         for object in &self.list {
-            match object.hit(ray, t_min, &closest_so_far) {
-                Some(record) => {
-                    closest_so_far = record.t;
-                    last_hit = Some(record);
-                }
-                None => {}
+            if let Some(record) = object.hit(ray, t_min, &closest_so_far) {
+                closest_so_far = record.t;
+                last_hit = Some(record);
             }
         }
         last_hit
