@@ -9,6 +9,8 @@ mod ray;
 use ray::Ray;
 mod objects;
 use objects::{HitableList, Sphere, HitRecord};
+mod camera;
+use camera::Camera;
 
 fn color(ray: &Ray, world: &HitableList) -> Vec3<f32> {
     let direction: Vec3<f32> = ray.direction;
