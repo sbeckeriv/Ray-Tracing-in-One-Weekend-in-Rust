@@ -34,6 +34,7 @@ fn main() {
     let horizon = Vec3::new(4.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
+    let camera = Camera::new(origin, lower_left_corner,vertical, horizon);
 
     let mut world = HitableList::new();
     world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5));
@@ -45,7 +46,7 @@ fn main() {
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
         let u = x as f32 / image_x as f32;
         let v = (image_y - 1 - y) as f32 / image_y as f32;
-        let ray = Ray::new(origin, lower_left_corner + horizon * u + vertical * v);
+        let ray = camera.get_ray(&u, &v);
         let col = color(&ray, &world);
         let base = 255.99;
         *pixel = image::Rgba([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8, 0]);

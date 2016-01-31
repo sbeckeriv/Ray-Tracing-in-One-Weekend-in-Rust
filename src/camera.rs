@@ -23,8 +23,8 @@ impl Camera {
             horizon: horizon,
         }
     }
-    pub fn get_ray(&self, u: f32, v: f32) -> Ray {
+    pub fn get_ray(&self, u: &f32, v: &f32) -> Ray {
         Ray::new(self.origin,
-                 self.lower_left_corner + self.horizon * u + self.vertical * v - self.origin)
+                 self.lower_left_corner + self.horizon * *u + self.vertical * *v - self.origin)
     }
 }
