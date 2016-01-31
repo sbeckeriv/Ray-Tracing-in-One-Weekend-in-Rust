@@ -7,7 +7,9 @@ use std::path::Path;
 use nalgebra::Dot;
 mod ray;
 use ray::Ray;
-fn hit_sphere(center: &Vec3<f32>, radius: f32, ray: &Ray) -> bool {
+mod objects;
+
+fn hit_sphere(center: &Vec3<f32>, radius: f32, ray: &Ray) -> Option<f32> {
     let origin = ray.origin;
     let direction = ray.direction;
     let oc = origin - *center;
@@ -16,18 +18,25 @@ fn hit_sphere(center: &Vec3<f32>, radius: f32, ray: &Ray) -> bool {
     let c = oc.dot(&oc) - radius*radius;
     let discriminate = b * b - 4.0 * a * c;
     //println!("{:?} {},{},{}",discriminate,a,b,c);
-    discriminate > 0.0
+    if discriminate < 0.0{
+        None
+    }else {
+        Some((0.0-b - discriminate.sqrt())/(2.0*a))
+    }
 }
 
 fn color(ray: &ray::Ray) -> Vec3<f32> {
     let direction: Vec3<f32> = ray.direction;
     let sphere = Vec3::new(0.0,0.0,0.0-1.0);
-    if hit_sphere(&sphere, 0.5, ray){
-        println!("in hit sphsere");
-        Vec3::new(1.0,0.0,0.0)
-    }else{
-        let t = 0.5 * (direction.y + 1.0);
-        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+    match hit_sphere(&sphere, 0.5, ray){
+        Some(t) =>{
+            let n = ray.point_at_parameter(t)-Vec3::new(0.0, 0.0, 0.0-1.0) ;
+            Vec3::new(n.x+1.0, n.y+1.0, n.z+1.0) * 0.5
+        },
+        None => {
+            let t = 0.5 * (direction.y + 1.0);
+            Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+        }
     }
 }
 
