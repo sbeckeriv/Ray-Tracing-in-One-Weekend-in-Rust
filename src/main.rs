@@ -64,9 +64,9 @@ fn main() {
         col = col / ns as f32;
         *pixel = image::Rgba([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8, 0]);
     }
-    // Save the image as “fractal.png”
     let ref mut fout = File::create(&Path::new("fractal.jpeg")).unwrap();
+    let _ = image::ImageRgba8(imgbuf.clone()).save(fout, image::JPEG);
 
-    // We must indicate the image’s color type and what format to save as
-    let _ = image::ImageRgba8(imgbuf).save(fout, image::JPEG);
+    let ref mut fout = File::create(&Path::new("fractal.ppm")).unwrap();
+    let _ = image::ImageRgba8(imgbuf).save(fout, image::PPM);
 }
