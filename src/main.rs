@@ -62,14 +62,11 @@ fn main() {
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
     let camera = Camera::new(origin, lower_left_corner, vertical, horizon);
-
+    let mat1 = Lambertian::new(Vec3::new(0.8, 0.3, 0.3));
+    let mat2 = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
     let mut world = HitableList::new();
-    world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0),
-    0.5,
-    Lambertian::new(Vec3::new(0.8, 0.3, 0.3))));
-    world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0),
-    100.0,
-    Lambertian::new(Vec3::new(0.8, 0.8, 0.0))));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, Box::new(mat1)));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, Box::new(mat2)));
     // Create a new ImgBuf with width: imgx and height: imgy
     let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
 

@@ -6,11 +6,12 @@ extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
 use objects::HitRecord;
-
 use nalgebra::Dot;
+
 pub trait Scatter{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
+
 fn random_in_unit_sphere() -> Vec3<f32> {
     let seed: &[_] = &[1, 2, 3, 4];
     let mut rand: rand::StdRng = rand::SeedableRng::from_seed(seed);
