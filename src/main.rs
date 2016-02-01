@@ -38,6 +38,7 @@ fn color(ray: &Ray, world: &HitableList, rand: &mut StdRng) -> Vec3<f32> {
     match world.hit(ray, &0.0, &std::f32::MAX) {
         Some(t) => {
             let n = t.normal;
+
             let target = t.normal + random_in_unit_sphere(rand) + t.p;
             // Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5
             color(&Ray::new(t.p, target - t.p), world, rand) * 0.5

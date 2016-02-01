@@ -3,13 +3,13 @@ extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
 use nalgebra::Dot;
-use material::{Metal, Lambertian};
+use material::Scatter;
 
-pub struct HitableList {
+pub struct HitableList<M: Scatter> {
     // should use trait and generics
-    pub list: Vec<Sphere>,
+    pub list: Vec<Sphere<M>>,
 }
-impl HitableList {
+impl<M: Scatter> HitableList<M> {
     // I think can do a from/to vec to hitable maybe. for now give it nothing and push
     pub fn new() -> Self {
         let list = Vec::new();
@@ -18,7 +18,7 @@ impl HitableList {
     pub fn len(&self) -> usize {
         self.list.len()
     }
-    pub fn push(&mut self, sphere: Sphere) {
+    pub fn push<M: Scatter>(&mut self, sphere: Sphere<M>) {
         self.list.push(sphere);
     }
     pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
@@ -49,14 +49,14 @@ impl HitRecord {
 }
 
 // not really the same. I should make a trait called hitable
-pub struct Sphere {
+pub struct Sphere<M: Scatter> {
     pub center: Vec3<f32>,
     pub radius: f32,
-    pub material: Lambertian,
+    pub material: M,
 }
 
-impl Sphere {
-    pub fn new(center: Vec3<f32>, radius: f32, material: Lambertian) -> Self {
+impl<M: Scatter> Sphere<M> {
+    pub fn new(center: Vec3<f32>, radius: f32, material: M) -> Self {
         Sphere {
             center: center,
             radius: radius,

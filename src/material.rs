@@ -8,7 +8,9 @@ use ray::Ray;
 use objects::HitRecord;
 
 use nalgebra::Dot;
-
+pub trait Scatter{
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
+}
 fn random_in_unit_sphere() -> Vec3<f32> {
     let seed: &[_] = &[1, 2, 3, 4];
     let mut rand: rand::StdRng = rand::SeedableRng::from_seed(seed);
@@ -38,8 +40,9 @@ impl Metal {
     pub fn new(albedo: Vec3<f32>) -> Self {
         Metal { albedo: albedo }
     }
-
-    pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
+}
+impl Scatter for Metal {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let reflected = self.reflect(&r_in.direction, &rec.normal);
         let target = rec.p + rec.normal + random_in_unit_sphere();
         let scarttered = Ray::new(rec.p, reflected);
@@ -59,7 +62,9 @@ impl Lambertian {
     pub fn new(albedo: Vec3<f32>) -> Self {
         Lambertian { albedo: albedo }
     }
-    pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
+}
+impl Scatter for Lambertian {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let target = rec.p + rec.normal + random_in_unit_sphere();
         let scarttered = Ray::new(rec.p, target - rec.p);
         Some((self.albedo, scarttered))
