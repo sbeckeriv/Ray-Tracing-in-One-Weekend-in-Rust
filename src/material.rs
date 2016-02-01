@@ -26,7 +26,7 @@ fn random_in_unit_sphere() -> Vec3<f32> {
     }
     p
 }
-
+// todo make scatter a trait
 pub struct Metal {
     albedo: Vec3<f32>,
 }

@@ -3,6 +3,7 @@ extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
 use nalgebra::Dot;
+use material::{Metal, Lambertian};
 
 pub struct HitableList {
     // should use trait and generics
@@ -51,13 +52,15 @@ impl HitRecord {
 pub struct Sphere {
     pub center: Vec3<f32>,
     pub radius: f32,
+    pub material: Lambertian,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3<f32>, radius: f32) -> Self {
+    pub fn new(center: Vec3<f32>, radius: f32, material: Lambertian) -> Self {
         Sphere {
             center: center,
             radius: radius,
+            material: material,
         }
     }
     pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {

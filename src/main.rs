@@ -15,7 +15,7 @@ use objects::{HitableList, Sphere};
 mod camera;
 use camera::Camera;
 mod material;
-use material::Lambertian;
+use material::{Metal, Lambertian};
 
 fn random_in_unit_sphere(rand: &mut StdRng) -> Vec3<f32> {
     let random_index = Range::new(0.0, 1.0);
@@ -39,8 +39,8 @@ fn color(ray: &Ray, world: &HitableList, rand: &mut StdRng) -> Vec3<f32> {
         Some(t) => {
             let n = t.normal;
             let target = t.normal + random_in_unit_sphere(rand) + t.p;
-            //Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5
-            color(&Ray::new(t.p, target-t.p), world, rand)*0.5
+            // Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5
+            color(&Ray::new(t.p, target - t.p), world, rand) * 0.5
         }
         None => {
             let t = 0.5 * (direction.y + 1.0);
@@ -63,8 +63,12 @@ fn main() {
     let camera = Camera::new(origin, lower_left_corner, vertical, horizon);
 
     let mut world = HitableList::new();
-    world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5));
-    world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0),
+    0.5,
+    Lambertian::new(Vec3::new(0.8, 0.3, 0.3))));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0),
+    100.0,
+    Lambertian::new(Vec3::new(0.8, 0.8, 0.0))));
     // Create a new ImgBuf with width: imgx and height: imgy
     let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
 
