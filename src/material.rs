@@ -40,10 +40,10 @@ impl Metal {
     }
 
     pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
-        let reflected = self.reflect(r_in.direction, rec.normal);
+        let reflected = self.reflect(&r_in.direction, &rec.normal);
         let target = rec.p + rec.normal + random_in_unit_sphere();
         let scarttered = Ray::new(rec.p, reflected);
-        if scarttered.dot(&rec.normal) > 0 {
+        if scarttered.direction.dot(&rec.normal) > 0.0 {
             Some((self.albedo, scarttered))
         } else {
             None
