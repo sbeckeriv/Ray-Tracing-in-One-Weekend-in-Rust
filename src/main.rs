@@ -79,6 +79,7 @@ fn main() {
         }
         let base = 255.99;
         col = col / ns as f32;
+        col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
         *pixel = image::Rgba([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8, 0]);
     }
     let ref mut fout = File::create(&Path::new("fractal.jpeg")).unwrap();
