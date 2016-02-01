@@ -63,22 +63,30 @@ fn main() {
     let mut rng: rand::StdRng = rand::SeedableRng::from_seed(seed);
     let random_index = Range::new(0.0, 1.0);
     let ns = 100;
+
     let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
     let horizon = Vec3::new(4.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
+
     let camera = Camera::new(origin, lower_left_corner, vertical, horizon);
     let mat1 = Rc::new(Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
     let mat2 = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
+
+    let metal1 = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2)));
+    let metal2 = Rc::new(Metal::new(Vec3::new(0.8, 0.8, 0.8)));
     let mut world = HitableList::new();
     world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, mat1.clone()));
     world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, mat2.clone()));
+    world.push(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
+    world.push(Sphere::new(Vec3::new(0.0-1.0, 0.0, 0.0 - 1.0), 0.5, metal2.clone()));
     // Create a new ImgBuf with width: imgx and height: imgy
     let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
 
     // Iterate over the coordiantes and pixels of the image
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
         let mut col = Vec3::new(0.0, 0.0, 0.0);
+        println!("{} {}", x, y);
         for i in 0..ns {
             let rand_x = random_index.ind_sample(&mut rng);
             let rand_y = random_index.ind_sample(&mut rng);
