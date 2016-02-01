@@ -2,6 +2,7 @@ extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
+use std::rc::Rc;
 use nalgebra::Dot;
 use material::Scatter;
 
@@ -21,13 +22,13 @@ impl HitableList {
     pub fn push(&mut self, sphere: Sphere) {
         self.list.push(sphere);
     }
-    pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
+    pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<(HitRecord, Rc<Scatter>)> {
         let mut closest_so_far = t_max.clone();
-        let mut last_hit: Option<HitRecord> = None;
+        let mut last_hit: Option<(HitRecord, Rc<Scatter>)> = None;
         for object in &self.list {
             if let Some(record) = object.hit(ray, t_min, &closest_so_far) {
                 closest_so_far = record.t;
-                last_hit = Some(record);
+                last_hit = Some((record, object.material.clone()));
             }
         }
         last_hit
@@ -52,17 +53,18 @@ impl HitRecord {
 pub struct Sphere {
     pub center: Vec3<f32>,
     pub radius: f32,
-    pub material: Box<Scatter>,
+    pub material: Rc<Scatter>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3<f32>, radius: f32, material: Box<Scatter>) -> Self {
+    pub fn new(center: Vec3<f32>, radius: f32, material: Rc<Scatter>) -> Self {
         Sphere {
             center: center,
             radius: radius,
             material: material,
         }
     }
+
     pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
         let origin = ray.origin;
         let direction = ray.direction;
