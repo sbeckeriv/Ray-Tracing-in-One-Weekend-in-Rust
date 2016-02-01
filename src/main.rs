@@ -14,6 +14,8 @@ mod objects;
 use objects::{HitableList, Sphere};
 mod camera;
 use camera::Camera;
+mod material;
+use material::Lambertian;
 
 fn random_in_unit_sphere(rand: &mut StdRng) -> Vec3<f32> {
     let random_index = Range::new(0.0, 1.0);
