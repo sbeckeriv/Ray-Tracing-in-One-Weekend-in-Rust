@@ -1,6 +1,6 @@
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-use rand::{Rng, SeedableRng, StdRng};
+use rand::ThreadRng;
 extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;

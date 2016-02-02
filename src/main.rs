@@ -3,7 +3,7 @@ extern crate nalgebra;
 extern crate nalgebra as na;
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-use rand::{Rng, ThreadRng};
+use rand::ThreadRng;
 use na::Vec3;
 use std::rc::Rc;
 use std::fs::File;
