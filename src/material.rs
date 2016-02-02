@@ -13,7 +13,6 @@ pub trait Scatter{
 }
 
 fn random_in_unit_sphere() -> Vec3<f32> {
-    let seed: &[_] = &[1, 2, 3, 4];
     let mut rand = rand::thread_rng();
 
     let random_index = Range::new(0.0, 1.0);
@@ -32,21 +31,29 @@ fn random_in_unit_sphere() -> Vec3<f32> {
 // todo make scatter a trait
 pub struct Metal {
     albedo: Vec3<f32>,
+    fuzz: f32,
 }
 impl Metal {
     fn reflect(&self, v: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
         *v - (*n * v.dot(n) * 2.0)
     }
     // move to util
-    pub fn new(albedo: Vec3<f32>) -> Self {
-        Metal { albedo: albedo }
+    pub fn new(albedo: Vec3<f32>, fuzz: f32) -> Self {
+        let clean_fuzz = if fuzz < 1.0 {
+            fuzz
+        } else {
+            1.0
+        };
+        Metal {
+            albedo: albedo,
+            fuzz: clean_fuzz,
+        }
     }
 }
 impl Scatter for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let reflected = self.reflect(&r_in.direction, &rec.normal);
-        let target = rec.p + rec.normal + random_in_unit_sphere();
-        let scarttered = Ray::new(rec.p, reflected);
+        let scarttered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz);
         if scarttered.direction.dot(&rec.normal) > 0.0 {
             Some((self.albedo, scarttered))
         } else {
