@@ -1,6 +1,5 @@
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-use rand::ThreadRng;
 extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;
@@ -72,7 +71,7 @@ impl Lambertian {
     }
 }
 impl Scatter for Lambertian {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let target = rec.p + rec.normal + random_in_unit_sphere();
         let scarttered = Ray::new(rec.p, target - rec.p);
         Some((self.albedo, scarttered))

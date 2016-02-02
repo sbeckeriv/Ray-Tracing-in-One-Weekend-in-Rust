@@ -16,9 +16,6 @@ impl HitableList {
         let list = Vec::new();
         HitableList { list: list }
     }
-    pub fn len(&self) -> usize {
-        self.list.len()
-    }
     pub fn push(&mut self, sphere: Sphere) {
         self.list.push(sphere);
     }
