@@ -7,6 +7,12 @@ use ray::Ray;
 use objects::HitRecord;
 use nalgebra::Dot;
 
+pub trait Reflect{
+    fn reflect(&self, v: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
+        *v - (*n * v.dot(n) * 2.0)
+    }
+}
+
 pub trait Scatter{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
@@ -32,10 +38,8 @@ pub struct Metal {
     albedo: Vec3<f32>,
     fuzz: f32,
 }
+
 impl Metal {
-    fn reflect(&self, v: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
-        *v - (*n * v.dot(n) * 2.0)
-    }
     // move to util
     pub fn new(albedo: Vec3<f32>, fuzz: f32) -> Self {
         let clean_fuzz = if fuzz < 1.0 {
@@ -49,6 +53,9 @@ impl Metal {
         }
     }
 }
+
+// I dont like that scatter needs reflect. I am unsure how to force a relationship here.
+impl Reflect for Metal {}
 impl Scatter for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let reflected = self.reflect(&r_in.direction, &rec.normal);
