@@ -3,7 +3,7 @@ extern crate nalgebra;
 extern crate nalgebra as na;
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-use rand::{Rng, SeedableRng, StdRng};
+use rand::{Rng, ThreadRng};
 use na::Vec3;
 use std::rc::Rc;
 use std::fs::File;
@@ -18,7 +18,7 @@ use camera::Camera;
 mod material;
 use material::{Metal, Lambertian};
 
-fn random_in_unit_sphere(rand: &mut StdRng) -> Vec3<f32> {
+fn random_in_unit_sphere(rand: &mut ThreadRng) -> Vec3<f32> {
     let random_index = Range::new(0.0, 1.0);
     let mut p: Vec3<f32>;
     let minus_vec = Vec3::new(1.0, 1.0, 1.0);
@@ -33,7 +33,7 @@ fn random_in_unit_sphere(rand: &mut StdRng) -> Vec3<f32> {
     p
 }
 
-fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut StdRng) -> Vec3<f32> {
+fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> Vec3<f32> {
     let direction: Vec3<f32> = ray.direction;
     let sphere = Vec3::new(0.0, 0.0, 0.0 - 1.0);
     match world.hit(ray, &0.0, &std::f32::MAX) {
@@ -60,7 +60,7 @@ fn main() {
     let image_x = 200;
     let image_y = 100;
     let seed: &[_] = &[1, 2, 3, 4];
-    let mut rng: rand::StdRng = rand::SeedableRng::from_seed(seed);
+    let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
     let ns = 100;
 
@@ -86,7 +86,6 @@ fn main() {
     // Iterate over the coordiantes and pixels of the image
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
         let mut col = Vec3::new(0.0, 0.0, 0.0);
-        println!("{} {}", x, y);
         for i in 0..ns {
             let rand_x = random_index.ind_sample(&mut rng);
             let rand_y = random_index.ind_sample(&mut rng);

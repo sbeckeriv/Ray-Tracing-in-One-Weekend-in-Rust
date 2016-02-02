@@ -14,7 +14,7 @@ pub trait Scatter{
 
 fn random_in_unit_sphere() -> Vec3<f32> {
     let seed: &[_] = &[1, 2, 3, 4];
-    let mut rand: rand::StdRng = rand::SeedableRng::from_seed(seed);
+    let mut rand = rand::thread_rng();
 
     let random_index = Range::new(0.0, 1.0);
     let mut p: Vec3<f32>;
