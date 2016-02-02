@@ -15,7 +15,6 @@ use objects::{HitableList, Sphere};
 mod camera;
 use camera::Camera;
 mod material;
-use material::{Metal, Lambertian};
 
 fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> Vec3<f32> {
     match world.hit(ray, &0.001, &std::f32::MAX) {
@@ -52,10 +51,10 @@ fn main() {
     let origin = Vec3::new(0.0, 0.0, 0.0);
 
     let camera = Camera::new(origin, lower_left_corner, vertical, horizon);
-    let mat1 = Rc::new(Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
-    let mat2 = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
-    let metal1 = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.3));
-    let metal2 = Rc::new(Metal::new(Vec3::new(0.8, 0.8, 0.8), 1.0));
+    let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
+    let mat2 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
+    let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.3));
+    let metal2 = Rc::new(material::Dielectric::new(1.5));
 
     let mut world = HitableList::new();
     world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, mat1.clone()));

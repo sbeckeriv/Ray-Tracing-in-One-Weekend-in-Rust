@@ -88,25 +88,15 @@ impl Dielectric {
 impl Reflect for Dielectric {}
 impl Scatter for Dielectric {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
-        let reflected = self.reflect(&r_in.direction, &rec.normal);
+        // let reflected = self.reflect(&r_in.direction, &rec.normal);
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
-        let mut outward_normal;
-        let mut ni_over_nt;
-        let (outward_normal, ni_over_nt) = if r_in.direction.dot(&rec.normal) > 0 {
-            (0.0 - rec.normal, self.ref_idx)
+        let (outward_normal, ni_over_nt) = if r_in.direction.dot(&rec.normal) > 0.0 {
+            (rec.normal * (0.0 - 1.0), self.ref_idx)
         } else {
             (rec.normal, 1.0 / self.ref_idx)
         };
-        let scarttered = if let Some(refracted) = self.refract(r_in.direction,
-                                                               outward_normal,
-                                                               ni_over_nt) {
-
-        } else {
-
-            Ray::new(rec.p, reflected);
-        };
-        if scarttered.direction.dot(&rec.normal) > 0.0 {
-            Some((attenuation, scarttered))
+        if let Some(refracted) = self.refract(&r_in.direction, &outward_normal, &ni_over_nt) {
+            Some((attenuation, Ray::new(rec.p, refracted)))
         } else {
             None
         }
