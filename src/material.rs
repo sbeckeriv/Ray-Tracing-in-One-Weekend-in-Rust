@@ -68,11 +68,54 @@ impl Scatter for Metal {
     }
 }
 
+pub struct Dielectric {
+    ref_idx: f32,
+}
+impl Dielectric {
+    pub fn new(ri: f32) -> Self {
+        Dielectric { ref_idx: ri }
+    }
+    fn refract(&self, v: &Vec3<f32>, n: &Vec3<f32>, ni_over_nt: &f32) -> Option<Vec3<f32>> {
+        let dt = v.dot(n);
+        let discriminate = 1.0 - ni_over_nt * ni_over_nt * (1.0 * dt * dt);
+        if discriminate > 0.0 {
+            Some(((*v - *n * dt) * *ni_over_nt) - *n * discriminate.sqrt())
+        } else {
+            None
+        }
+    }
+}
+impl Reflect for Dielectric {}
+impl Scatter for Dielectric {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
+        let reflected = self.reflect(&r_in.direction, &rec.normal);
+        let attenuation = Vec3::new(1.0, 1.0, 1.0);
+        let mut outward_normal;
+        let mut ni_over_nt;
+        let (outward_normal, ni_over_nt) = if r_in.direction.dot(&rec.normal) > 0 {
+            (0.0 - rec.normal, self.ref_idx)
+        } else {
+            (rec.normal, 1.0 / self.ref_idx)
+        };
+        let scarttered = if let Some(refracted) = self.refract(r_in.direction,
+                                                               outward_normal,
+                                                               ni_over_nt) {
+
+        } else {
+
+            Ray::new(rec.p, reflected);
+        };
+        if scarttered.direction.dot(&rec.normal) > 0.0 {
+            Some((attenuation, scarttered))
+        } else {
+            None
+        }
+    }
+}
 pub struct Lambertian {
     albedo: Vec3<f32>,
 }
 impl Lambertian {
-    // move to util
     pub fn new(albedo: Vec3<f32>) -> Self {
         Lambertian { albedo: albedo }
     }
