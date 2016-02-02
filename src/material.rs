@@ -84,15 +84,22 @@ impl Dielectric {
             None
         }
     }
+    fn schlick(&self, cosine: f32, ref_idx: f32) -> f32 {
+        let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+        r0 = r0 * r0;
+        r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0)
+    }
 }
 impl Reflect for Dielectric {}
 impl Scatter for Dielectric {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
-        let attenuation = Vec3::new(1.0, 1.0, 0.0);
-        let (outward_normal, ni_over_nt) = if r_in.direction.dot(&rec.normal) > 0.0 {
-            (rec.normal * (0.0 - 1.0), self.ref_idx)
+        let attenuation = Vec3::new(1.0, 1.0, 1.0);
+        let (outward_normal, ni_over_nt, cosine) = if r_in.direction.dot(&rec.normal) > 0.0 {
+            let cos = self.ref_idx * r_in.direction.dot(&rec.normal) / r_in.direction.len() as f32;
+            (rec.normal * (0.0 - 1.0), self.ref_idx, cos)
         } else {
-            (rec.normal, (1.0 / self.ref_idx))
+            let cos = (0.0 - 1.0) * r_in.direction.dot(&rec.normal) / r_in.direction.len() as f32;
+            (rec.normal, (1.0 / self.ref_idx), cos)
         };
         if let Some(refracted) = self.refract(&r_in.direction, &outward_normal, &ni_over_nt) {
             Some((attenuation, Ray::new(rec.p, refracted)))
