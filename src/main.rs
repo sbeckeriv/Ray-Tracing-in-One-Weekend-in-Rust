@@ -34,9 +34,7 @@ fn random_in_unit_sphere(rand: &mut ThreadRng) -> Vec3<f32> {
 }
 
 fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> Vec3<f32> {
-    let direction: Vec3<f32> = ray.direction;
-    let sphere = Vec3::new(0.0, 0.0, 0.0 - 1.0);
-    match world.hit(ray, &0.0, &std::f32::MAX) {
+    match world.hit(ray, &0.001, &std::f32::MAX) {
         Some((t, material)) => {
             if depth < 50 {
                 match material.scatter(ray, &t) {
@@ -50,6 +48,7 @@ fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> 
             }
         }
         None => {
+            let direction: Vec3<f32> = ray.direction;
             let t = 0.5 * (direction.y + 1.0);
             Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
         }
