@@ -12,18 +12,26 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new_positionable(vfov: f32, aspect: f32) -> Self {
+    pub fn new_positionable(look_from: Vec3<f32>,
+                            look_at: Vec3<f32>,
+                            vup: Vec3<f32>,
+                            vfov: f32,
+                            aspect: f32)
+                            -> Self {
         let theta = vfov * f32::consts::PI / 180.0;
         let half_height = (theta / 2.0).tan();
         let half_width = aspect * half_height;
+        let w = look_from - look_at;
+        let u = nalgebra::cross(&vup, &w);
+        let v = nalgebra::cross(&w, &u);
         Camera {
-            origin: Vec3::new(0.0, 0.0, 0.0),
+            origin: look_from,
             lower_left_corner: Vec3::new(half_width * (0.0 - 1.0),
                                          half_height * (0.0 - 1.0),
                                          0.0 - 1.0),
 
-            vertical: Vec3::new(0.0, 2.0 * half_width, 0.0),
-            horizon: Vec3::new(2.0 * half_height, 0.0, 0.0),
+            vertical: u * 2.0 * half_height,
+            horizon: v * 2.0 * half_height,
         }
 
     }
