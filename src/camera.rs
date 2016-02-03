@@ -27,8 +27,8 @@ impl Camera {
         Camera {
             lower_left_corner: look_from - u * half_width - v * half_height - w,
             origin: look_from,
-            vertical: u * 2.0 * half_height,
-            horizon: v * 2.0 * half_height,
+            vertical: v * 2.0 * half_height,
+            horizon: u * 2.0 * half_width,
         }
 
     }
