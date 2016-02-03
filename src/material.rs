@@ -19,7 +19,6 @@ pub trait Scatter{
 
 fn random_in_unit_sphere() -> Vec3<f32> {
     let mut rand = rand::thread_rng();
-
     let random_index = Range::new(0.0, 1.0);
     let mut p: Vec3<f32>;
     let minus_vec = Vec3::new(1.0, 1.0, 1.0);
@@ -76,7 +75,8 @@ impl Dielectric {
         Dielectric { ref_idx: ri }
     }
     fn refract(&self, v: &Vec3<f32>, n: &Vec3<f32>, ni_over_nt: &f32) -> Option<Vec3<f32>> {
-        let dt = v.dot(n);
+        let uv = Vec3::new(0.0, 0.0, 0.0);
+        let dt = uv.dot(n);
         let discriminate = 1.0 - ni_over_nt * ni_over_nt * (1.0 * dt * dt);
         if discriminate > 0.0 {
             Some(((*v - *n * dt) * *ni_over_nt) - *n * discriminate.sqrt())
@@ -101,11 +101,21 @@ impl Scatter for Dielectric {
             let cos = (0.0 - 1.0) * r_in.direction.dot(&rec.normal) / r_in.direction.len() as f32;
             (rec.normal, (1.0 / self.ref_idx), cos)
         };
-        if let Some(refracted) = self.refract(&r_in.direction, &outward_normal, &ni_over_nt) {
-            Some((attenuation, Ray::new(rec.p, refracted)))
+        let refracted = self.refract(&r_in.direction, &outward_normal, &ni_over_nt);
+        let reflect_prob = if refracted.is_some() {
+            self.schlick(cosine, self.ref_idx)
         } else {
+            1.0
+        };
+
+        let mut rand = rand::thread_rng();
+        let random_index = Range::new(0.0, 1.0);
+        let random = random_index.ind_sample(&mut rand);
+        if random < reflect_prob {
             let reflected = self.reflect(&r_in.direction, &rec.normal);
             Some((attenuation, Ray::new(rec.p, reflected)))
+        } else {
+            Some((attenuation, Ray::new(rec.p, refracted.unwrap())))
         }
     }
 }

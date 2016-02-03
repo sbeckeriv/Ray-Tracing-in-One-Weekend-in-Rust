@@ -3,3 +3,6 @@ use https://crates.io/crates/image/ for ppm. it seems to be active. no crates? h
 
 Vec 3 we will use http://nalgebra.org/doc/nalgebra/struct.Vec3.html
 nalgebra = "0.5.1"
+
+
+
