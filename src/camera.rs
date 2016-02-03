@@ -25,11 +25,8 @@ impl Camera {
         let u = nalgebra::cross(&vup, &w);
         let v = nalgebra::cross(&w, &u);
         Camera {
+            lower_left_corner: look_from - u * half_width - v * half_height - w,
             origin: look_from,
-            lower_left_corner: Vec3::new(half_width * (0.0 - 1.0),
-                                         half_height * (0.0 - 1.0),
-                                         0.0 - 1.0),
-
             vertical: u * 2.0 * half_height,
             horizon: v * 2.0 * half_height,
         }
