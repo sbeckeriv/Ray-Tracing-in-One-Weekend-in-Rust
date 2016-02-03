@@ -75,7 +75,7 @@ impl Dielectric {
         Dielectric { ref_idx: ri }
     }
     fn refract(&self, v: &Vec3<f32>, n: &Vec3<f32>, ni_over_nt: &f32) -> Option<Vec3<f32>> {
-        let uv = Vec3::new(0.0, 0.0, 0.0);
+        let uv = Vec3::new(v.x * v.x, v.y * v.y, v.z * v.z);
         let dt = uv.dot(n);
         let discriminate = 1.0 - ni_over_nt * ni_over_nt * (1.0 * dt * dt);
         if discriminate > 0.0 {
