@@ -7,6 +7,7 @@ use rand::ThreadRng;
 use na::Vec3;
 use std::f32;
 use std::rc::Rc;
+use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
 mod ray;
@@ -92,11 +93,21 @@ fn main() {
         let base = 255.99;
         col = col / ns as f32;
         col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
-        *pixel = image::Rgba([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8, 0]);
+        *pixel = image::Rgb([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8]);
     }
     let ref mut fout = File::create(&Path::new("fractal.jpeg")).unwrap();
-    let _ = image::ImageRgba8(imgbuf.clone()).save(fout, image::JPEG);
+    let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
 
     let ref mut fout = File::create(&Path::new("fractal.ppm")).unwrap();
-    let _ = image::ImageRgba8(imgbuf).save(fout, image::PPM);
+    let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
+    {
+        let ref mut fout = File::create(&Path::new("home_fractal.ppm")).unwrap();
+        let string = format!("P3\n {} {}\n255\n", image_x, image_y);
+        fout.write(string.as_bytes());
+        for pixel in imgbuf.pixels(){
+            let string = format!("{} {} {}\n", pixel.data[0], pixel.data[1], pixel.data[2]);
+            fout.write(string.as_bytes());
+        }
+    }
+
 }
