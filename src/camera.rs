@@ -24,7 +24,7 @@ impl Camera {
         let half_width = aspect * half_height;
         let looking = look_from - look_at;
         let w = unit_vector(&looking);
-        let u = unit_vector(&nalgebra::cross(&vup, &w));
+        let u = nalgebra::cross(&vup, &w);
         let v = nalgebra::cross(&w, &u);
         Camera {
             // look from is the same as origin
