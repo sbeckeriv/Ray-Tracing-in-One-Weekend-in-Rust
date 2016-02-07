@@ -10,6 +10,8 @@ use std::rc::Rc;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
+mod utils;
+use utils::unit_vector;
 mod ray;
 use ray::Ray;
 mod objects;
@@ -33,7 +35,7 @@ fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> 
             }
         }
         None => {
-            let direction: Vec3<f32> = ray.direction;
+            let direction: Vec3<f32> = unit_vector(&ray.direction);
             let t = 0.5 * (direction.y + 1.0);
             Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
         }
