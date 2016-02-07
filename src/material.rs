@@ -81,13 +81,15 @@ impl Reflect for Dielectric {}
 impl Scatter for Dielectric {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
+        let dot_direction = r_in.direction.dot(&rec.normal) / r_in.direction.len() as f32;
         let (outward_normal, ni_over_nt, cosine) = if r_in.direction.dot(&rec.normal) > 0.0 {
-            let cos = self.ref_idx * r_in.direction.dot(&rec.normal) / r_in.direction.len() as f32;
+            let cos = self.ref_idx * dot_direction;
             (rec.normal * (0.0 - 1.0), self.ref_idx, cos)
         } else {
-            let cos = (0.0 - 1.0) * r_in.direction.dot(&rec.normal) / r_in.direction.len() as f32;
+            let cos = dot_direction * (0.0 - 1.0);
             (rec.normal, (1.0 / self.ref_idx), cos)
         };
+
         let refracted = self.refract(&r_in.direction, &outward_normal, &ni_over_nt);
         let reflect_prob = if refracted.is_some() {
             self.schlick(cosine, self.ref_idx)

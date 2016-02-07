@@ -3,6 +3,7 @@ extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
 use std::f32;
+use utils::unit_vector;
 
 pub struct Camera {
     pub origin: Vec3<f32>,
@@ -21,8 +22,9 @@ impl Camera {
         let theta = vfov * f32::consts::PI / 180.0;
         let half_height = (theta / 2.0).tan();
         let half_width = aspect * half_height;
-        let w = look_from - look_at;
-        let u = nalgebra::cross(&vup, &w);
+        let looking = look_from - look_at;
+        let w = unit_vector(&looking);
+        let u = unit_vector(&nalgebra::cross(&vup, &w));
         let v = nalgebra::cross(&w, &u);
         Camera {
             lower_left_corner: look_from - u * half_width - v * half_height - w,

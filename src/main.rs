@@ -54,22 +54,23 @@ fn main() {
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
 
-    // let camera = Camera::new(origin, lower_left_corner, vertical, horizon);
     let camera = Camera::new_positionable(Vec3::new(0.0 - 2.0, 2.0, 1.0),
     Vec3::new(0.0, 0.0, 0.0 - 1.0),
     Vec3::new(0.0, 1.0, 0.0),
     90.0,
     image_x as f32 / image_y as f32);
+
     let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
     let mat2 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
-    let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.3));
-    let metal2 = Rc::new(material::Dielectric::new(1.5));
+    let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
+    let die1 = Rc::new(material::Dielectric::new(1.5));
 
     let mut world = HitableList::new();
     world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, mat1.clone()));
     world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, mat2.clone()));
     world.push(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
-    world.push(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, metal2.clone()));
+    world.push(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
+
     // camera red blue balls
     // let r = (f32::consts::PI/4.0).cos();
     // let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
