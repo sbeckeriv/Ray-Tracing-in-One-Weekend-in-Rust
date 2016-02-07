@@ -27,10 +27,11 @@ impl Camera {
         let u = unit_vector(&nalgebra::cross(&vup, &w));
         let v = nalgebra::cross(&w, &u);
         Camera {
+            // look from is the same as origin
             lower_left_corner: look_from - u * half_width - v * half_height - w,
             origin: look_from,
-            vertical: v * 2.0 * half_height,
             horizon: u * 2.0 * half_width,
+            vertical: v * 2.0 * half_height,
         }
 
     }
