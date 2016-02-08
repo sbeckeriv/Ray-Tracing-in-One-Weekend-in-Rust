@@ -42,24 +42,32 @@ fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> 
     }
 }
 
-fn main() {
-    let image_x = 200;
-    let image_y = 100;
-    let mut rng = rand::thread_rng();
-    let random_index = Range::new(0.0, 1.0);
-    let ns = 100;
-
+fn normal_cam(image_x: &u32, image_y: &u32) -> Camera {
     let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
     let horizon = Vec3::new(4.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
 
-    let camera = Camera::new_positionable(Vec3::new(0.0 - 2.0, 2.0, 1.0),
+    Camera::new_positionable(Vec3::new(0.0 - 2.0, 2.0, 1.0),
     Vec3::new(0.0, 0.0, 0.0 - 1.0),
     Vec3::new(0.0, 1.0, 0.0),
     90.0,
-    image_x as f32 / image_y as f32);
+    *image_x as f32 / *image_y as f32)
+}
+fn test_cam(image_x: &u32, image_y: &u32) -> Camera {
+    let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
+    let horizon = Vec3::new(4.0, 0.0, 0.0);
+    let vertical = Vec3::new(0.0, 2.0, 0.0);
+    let origin = Vec3::new(0.0, 0.0, 0.0);
 
+    Camera::new_positionable(Vec3::new(0.0 - 2.0, 2.0, 1.0),
+    Vec3::new(0.0, 0.0, 0.0 - 1.0),
+    Vec3::new(0.0, 1.0, 0.0),
+    90.0,
+    *image_x as f32 / *image_y as f32)
+}
+
+fn world() -> HitableList {
     let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
     let mat2 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
     let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
@@ -70,15 +78,30 @@ fn main() {
     world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, mat2.clone()));
     world.push(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
     world.push(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
+    world
+}
 
+fn world2() -> HitableList {
     // camera red blue balls
-    // let r = (f32::consts::PI/4.0).cos();
-    // let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
-    // let mat2 = Rc::new(material::Lambertian::new(Vec3::new(1.0, 0.0, 0.0)));
-    // let mut world = HitableList::new();
-    // world.push(Sphere::new(Vec3::new(r*(0.0-1.0), 0.0, 0.0 - 1.0), r, mat1.clone()));
-    // world.push(Sphere::new(Vec3::new(r, 0.0, 0.0 - 1.0), r, mat2.clone()));
-    //
+    let r = (f32::consts::PI / 4.0).cos();
+    let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
+    let mat2 = Rc::new(material::Lambertian::new(Vec3::new(1.0, 0.0, 0.0)));
+    let mut world = HitableList::new();
+    world.push(Sphere::new(Vec3::new(r * (0.0 - 1.0), 0.0, 0.0 - 1.0), r, mat1.clone()));
+    world.push(Sphere::new(Vec3::new(r, 0.0, 0.0 - 1.0), r, mat2.clone()));
+    world
+}
+
+fn main() {
+    let image_x = 200;
+    let image_y = 200;
+    let mut rng = rand::thread_rng();
+    let random_index = Range::new(0.0, 1.0);
+    let ns = 100;
+
+    let camera = normal_cam(&image_x, &image_y);
+    let mut world = world2();
+
     // Create a new ImgBuf with width: imgx and height: imgy
     let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
 
@@ -107,7 +130,7 @@ fn main() {
         let ref mut fout = File::create(&Path::new("home_fractal.ppm")).unwrap();
         let string = format!("P3\n {} {}\n255\n", image_x, image_y);
         fout.write(string.as_bytes());
-        for pixel in imgbuf.pixels(){
+        for pixel in imgbuf.pixels() {
             let string = format!("{} {} {}\n", pixel.data[0], pixel.data[1], pixel.data[2]);
             fout.write(string.as_bytes());
         }
