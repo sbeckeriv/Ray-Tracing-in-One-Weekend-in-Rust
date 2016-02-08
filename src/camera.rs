@@ -3,8 +3,7 @@ extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
 use std::f32;
-use utils::unit_vector;
-use utils::random_in_unit_sphere;
+use utils::{unit_vector, random_unit_disk};
 
 pub struct Camera {
     pub origin: Vec3<f32>,
@@ -35,13 +34,15 @@ impl Camera {
             // look from is the same as origin
             lower_left_corner: look_from - u * focus_dist * half_width -
                                v * focus_dist * half_height -
-                               focus_dist * w,
+                               w * focus_dist,
             origin: look_from,
             horizon: u * 2.0 * half_width * focus_dist,
             vertical: v * 2.0 * half_height * focus_dist,
+            lens_raidus: lens_raidus,
         }
 
     }
+
     pub fn new_positionable(look_from: Vec3<f32>,
                             look_at: Vec3<f32>,
                             vup: Vec3<f32>,
@@ -76,10 +77,15 @@ impl Camera {
             lower_left_corner: lower_left_corner,
             vertical: vertical,
             horizon: horizon,
+            lens_raidus: 0.0,
         }
     }
+
     pub fn get_ray(&self, u: &f32, v: &f32) -> Ray {
-        Ray::new(self.origin,
-                 self.lower_left_corner + self.horizon * *u + self.vertical * *v - self.origin)
+        let rd = random_unit_disk() * self.lens_raidus;
+        let offset = u * rd.x + v * rd.y;
+        Ray::new(self.origin + offset,
+                 self.lower_left_corner + self.horizon * *u + self.vertical * *v - self.origin -
+                 offset)
     }
 }
