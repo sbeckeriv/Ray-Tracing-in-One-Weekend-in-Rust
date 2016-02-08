@@ -100,7 +100,7 @@ fn main() {
     let ns = 100;
 
     let camera = normal_cam(&image_x, &image_y);
-    let mut world = world2();
+    let mut world = world();
 
     // Create a new ImgBuf with width: imgx and height: imgy
     let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
