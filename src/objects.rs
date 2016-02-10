@@ -52,6 +52,9 @@ pub struct Sphere {
     pub radius: f32,
     pub material: Rc<Scatter>,
 }
+unsafe impl Send for Sphere {}
+unsafe impl Sync for Sphere {}
+
 
 impl Sphere {
     pub fn new(center: Vec3<f32>, radius: f32, material: Rc<Scatter>) -> Self {

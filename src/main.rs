@@ -2,11 +2,13 @@ extern crate image;
 extern crate nalgebra;
 extern crate nalgebra as na;
 extern crate rand;
+extern crate simple_parallel;
 use rand::distributions::{IndependentSample, Range};
 use rand::ThreadRng;
 use na::Vec3;
 use std::f32;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
@@ -20,13 +22,13 @@ mod camera;
 use camera::Camera;
 mod material;
 
-fn color(ray: &Ray, world: &HitableList, depth: usize, rand: &mut ThreadRng) -> Vec3<f32> {
+fn color(ray: &Ray, world: &HitableList, depth: usize) -> Vec3<f32> {
     match world.hit(ray, &0.001, &std::f32::MAX) {
         Some((t, material)) => {
             if depth < 50 {
                 match material.scatter(ray, &t) {
                     Some((attenuation, scattered)) => {
-                        attenuation * color(&scattered, world, depth + 1, rand)
+                        attenuation * color(&scattered, world, depth + 1)
                     }
                     None => Vec3::new(0.0, 0.0, 0.0),
                 }
@@ -145,7 +147,9 @@ fn random_world() -> HitableList {
                     let four = random_index.ind_sample(&mut rng) *
                         random_index.ind_sample(&mut rng);
                     let metal_vec = Vec3::new(0.5 * (1.0 + one), 0.5 * (1.0 + two), 0.5 * (1.0 + three));
-                    let base_mat = Rc::new(material::Metal::new(metal_vec, 0.5 * four));
+                    let base_mat = Rc::new(material::Metal::new(
+                            Vec3::new(0.5 * (1.0 + one), 0.5 * (1.0 + two), 0.5 * (1.0 + three))
+                            , 0.5 * four));
                     world.push(Sphere::new(center, rand_size, base_mat.clone()));
                 } else {
                     let base_mat = Rc::new(material::Dielectric::new(1.5));
@@ -167,31 +171,30 @@ fn random_world() -> HitableList {
 fn main() {
     let image_x = 200;
     let image_y = 200;
-    let mut rng = rand::thread_rng();
-    let random_index = Range::new(0.0, 1.0);
     let ns = 100;
 
-    let camera = normal_cam(&image_x, &image_y);
-    let world = random_world();
+    let camera_rc = Arc::new(normal_cam(&image_x, &image_y));
+    let world_rc = Arc::new(random_world());
     // Create a new ImgBuf with width: imgx and height: imgy
-    let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
-
-    // Iterate over the coordiantes and pixels of the image
-    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+    let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
+    let mut pool = simple_parallel::Pool::new(4);
+    pool.for_(imgbuf.enumerate_pixels_mut(),|(x, y, pixel)|{
+        let image_x = 200;
+        let image_y = 200;
+        let camera = camera_rc.clone();
+        let world = world_rc.clone();
         let mut col = Vec3::new(0.0, 0.0, 0.0);
-        for _ in 0..ns {
-            let rand_x = random_index.ind_sample(&mut rng);
-            let rand_y = random_index.ind_sample(&mut rng);
-            let u = (x as f32 + rand_x) / image_x as f32;
-            let v = ((image_y - 1 - y) as f32 + rand_y) / image_y as f32;
-            let ray = camera.get_ray(&u, &v);
-            col = col + color(&ray, &world, 0, &mut rng);
-        }
+
+        let u = (x as f32 ) / image_x as f32;
+        let v = ((image_y - 1 - y) as f32 ) / image_y as f32;
+        let ray = camera.get_ray(&u, &v);
+        col = col + color(&ray, &world, 0);
         let base = 255.99;
-        col = col / ns as f32;
+        //col = col / 100 as f32;
         col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
-        *pixel = image::Rgb([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8]);
-    }
+        *pixel = image::Rgb([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8]) ;
+    });
+    println!("done");
     let ref mut fout = File::create(&Path::new("fractal.jpeg")).unwrap();
     let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
 

@@ -14,7 +14,7 @@ pub trait Reflect{
     }
 }
 
-pub trait Scatter{
+pub trait Scatter {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
 
@@ -23,6 +23,8 @@ pub struct Metal {
     albedo: Vec3<f32>,
     fuzz: f32,
 }
+unsafe impl Send for Metal {}
+unsafe impl Sync for Metal {}
 
 impl Metal {
     // move to util
@@ -57,6 +59,8 @@ impl Scatter for Metal {
 pub struct Dielectric {
     ref_idx: f32,
 }
+unsafe impl Send for Dielectric {}
+unsafe impl Sync for Dielectric {}
 impl Dielectric {
     pub fn new(ri: f32) -> Self {
         Dielectric { ref_idx: ri }
@@ -108,9 +112,15 @@ impl Scatter for Dielectric {
         }
     }
 }
+
+
 pub struct Lambertian {
     albedo: Vec3<f32>,
 }
+
+unsafe impl Send for Lambertian {}
+unsafe impl Sync for Lambertian {}
+
 impl Lambertian {
     pub fn new(albedo: Vec3<f32>) -> Self {
         Lambertian { albedo: albedo }
