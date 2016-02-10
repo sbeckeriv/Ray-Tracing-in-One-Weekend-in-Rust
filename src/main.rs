@@ -61,16 +61,19 @@ fn normal_cam2(image_x: &u32, image_y: &u32) -> Camera {
 }
 
 fn normal_cam(image_x: &u32, image_y: &u32) -> Camera {
+
+    let look_from = Vec3::new(0.0-4.0, 3.5, 0.0-2.0);
+    let look_at = Vec3::new(0.0, 0.0, 0.0 - 1.0);
     let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
     let horizon = Vec3::new(4.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
 
-    Camera::new_positionable(Vec3::new(0.0 - 2.0, 2.0, 1.0),
-    Vec3::new(0.0, 0.0, 0.0 - 1.0),
-    Vec3::new(0.0, 1.0, 0.0),
-    90.0,
-    *image_x as f32 / *image_y as f32)
+    Camera::new_positionable(look_from,
+                             look_at,
+                             Vec3::new(0.0, 1.0, 0.0),
+                             90.0,
+                             *image_x as f32 / *image_y as f32)
 }
 
 fn test_cam(image_x: &u32, image_y: &u32) -> Camera {
@@ -114,14 +117,13 @@ fn world2() -> HitableList {
 fn random_world() -> HitableList {
     let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
-    let random_size_index = Range::new(0.1, 0.3);
+    let random_size_index = Range::new(0.03, 0.55);
     let mut world = HitableList::new();
     let base_mat = Rc::new(material::Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
     world.push(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0), 1000.0, base_mat.clone()));
     let minus_vec = Vec3::new(4.0, 0.2, 0.0);
     for a in ((0 - 21)..22) {
-        for b in ((0 - 21)..22) {
-
+        for b in ((0 - 11)..22) {
             let rand_size = random_size_index.ind_sample(&mut rng);
             let rand_mat = random_index.ind_sample(&mut rng);
             let center = Vec3::new(a as f32 + 0.9 * random_index.ind_sample(&mut rng),
@@ -151,26 +153,26 @@ fn random_world() -> HitableList {
                 }
             }
         }
-        let die1 = Rc::new(material::Dielectric::new(1.5));
-        world.push(Sphere::new(Vec3::new(0.0, 1.0 , 0.0), 4.0, die1.clone()));
+        //let die1 = Rc::new(material::Dielectric::new(1.5));
+        //world.push(Sphere::new(Vec3::new(0.0, 1.0 , 0.0), 1.0, die1.clone()));
 
-        let lam1 = Rc::new(material::Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
-        world.push(Sphere::new(Vec3::new(0.0-4.0, 1.0 , 0.0), 4.0, lam1.clone()));
+        //let lam1 = Rc::new(material::Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
+        //world.push(Sphere::new(Vec3::new(0.0-4.0, 1.0 , 0.0), 4.0, lam1.clone()));
 
         let metal1= Rc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5),0.0));
-        world.push(Sphere::new(Vec3::new(4.0, 1.0 , 0.0), 4.0, metal1.clone()));
+        world.push(Sphere::new(Vec3::new(4.0, 1.0 , 0.0), 1.0, metal1.clone()));
     }
     world
 }
 fn main() {
-    let image_x = 1000;
-    let image_y = 1000;
+    let image_x = 200;
+    let image_y = 200;
     let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
     let ns = 100;
 
     let camera = normal_cam(&image_x, &image_y);
-    let mut world = random_world();
+    let world = random_world();
     // Create a new ImgBuf with width: imgx and height: imgy
     let mut imgbuf = image::ImageBuffer::new(image_x, image_y);
 
