@@ -14,7 +14,7 @@ pub trait Reflect{
     }
 }
 
-pub trait Scatter{
+pub trait Scatter {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
 
@@ -108,9 +108,12 @@ impl Scatter for Dielectric {
         }
     }
 }
+
+
 pub struct Lambertian {
     albedo: Vec3<f32>,
 }
+
 impl Lambertian {
     pub fn new(albedo: Vec3<f32>) -> Self {
         Lambertian { albedo: albedo }
