@@ -90,38 +90,38 @@ fn test_cam(image_x: &u32, image_y: &u32) -> Camera {
     90.0,
     *image_x as f32 / *image_y as f32)
 }
+/*
+   fn world() -> HitableList {
+   let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
+   let mat2 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
+   let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
+   let die1 = Rc::new(material::Dielectric::new(1.5));
 
-fn world() -> HitableList {
-    let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
-    let mat2 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
-    let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
-    let die1 = Rc::new(material::Dielectric::new(1.5));
+   let mut world = HitableList::new();
+   world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, mat1.clone()));
+   world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, mat2.clone()));
+   world.push(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
+   world.push(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
+   world
+   }
 
-    let mut world = HitableList::new();
-    world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, mat1.clone()));
-    world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, mat2.clone()));
-    world.push(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
-    world.push(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
-    world
+   fn world2() -> HitableList {
+// camera red blue balls
+let r = (f32::consts::PI / 4.0).cos();
+let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
+let mat2 = Rc::new(material::Lambertian::new(Vec3::new(1.0, 0.0, 0.0)));
+let mut world = HitableList::new();
+world.push(Sphere::new(Vec3::new(r * (0.0 - 1.0), 0.0, 0.0 - 1.0), r, mat1.clone()));
+world.push(Sphere::new(Vec3::new(r, 0.0, 0.0 - 1.0), r, mat2.clone()));
+world
 }
-
-fn world2() -> HitableList {
-    // camera red blue balls
-    let r = (f32::consts::PI / 4.0).cos();
-    let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
-    let mat2 = Rc::new(material::Lambertian::new(Vec3::new(1.0, 0.0, 0.0)));
-    let mut world = HitableList::new();
-    world.push(Sphere::new(Vec3::new(r * (0.0 - 1.0), 0.0, 0.0 - 1.0), r, mat1.clone()));
-    world.push(Sphere::new(Vec3::new(r, 0.0, 0.0 - 1.0), r, mat2.clone()));
-    world
-}
-
+*/
 fn random_world() -> HitableList {
     let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
     let random_size_index = Range::new(0.03, 0.55);
     let mut world = HitableList::new();
-    let base_mat = Rc::new(material::Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
+    let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
     world.push(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0), 1000.0, base_mat.clone()));
     let minus_vec = Vec3::new(4.0, 0.2, 0.0);
     for a in ((0 - 21)..22) {
@@ -137,7 +137,7 @@ fn random_world() -> HitableList {
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let three = random_index.ind_sample(&mut rng) *
                         random_index.ind_sample(&mut rng);
-                    let base_mat = Rc::new(material::Lambertian::new(Vec3::new(one, two, three)));
+                    let base_mat = Arc::new(material::Lambertian::new(Vec3::new(one, two, three)));
                     world.push(Sphere::new(center, rand_size, base_mat.clone()));
                 } else if rand_mat < 0.95 {
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
@@ -147,12 +147,12 @@ fn random_world() -> HitableList {
                     let four = random_index.ind_sample(&mut rng) *
                         random_index.ind_sample(&mut rng);
                     let metal_vec = Vec3::new(0.5 * (1.0 + one), 0.5 * (1.0 + two), 0.5 * (1.0 + three));
-                    let base_mat = Rc::new(material::Metal::new(
+                    let base_mat = Arc::new(material::Metal::new(
                             Vec3::new(0.5 * (1.0 + one), 0.5 * (1.0 + two), 0.5 * (1.0 + three))
                             , 0.5 * four));
                     world.push(Sphere::new(center, rand_size, base_mat.clone()));
                 } else {
-                    let base_mat = Rc::new(material::Dielectric::new(1.5));
+                    let base_mat = Arc::new(material::Dielectric::new(1.5));
                     world.push(Sphere::new(center, rand_size, base_mat.clone()));
                 }
             }
@@ -163,14 +163,14 @@ fn random_world() -> HitableList {
         //let lam1 = Rc::new(material::Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
         //world.push(Sphere::new(Vec3::new(0.0-4.0, 1.0 , 0.0), 4.0, lam1.clone()));
 
-        let metal1= Rc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5),0.0));
+        let metal1= Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5),0.0));
         world.push(Sphere::new(Vec3::new(4.0, 1.0 , 0.0), 1.0, metal1.clone()));
     }
     world
 }
 fn main() {
-    let image_x = 200;
-    let image_y = 200;
+    let image_x = 400;
+    let image_y = 400;
     let ns = 100;
 
     let camera_rc = Arc::new(normal_cam(&image_x, &image_y));
@@ -179,8 +179,6 @@ fn main() {
     let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
     let mut pool = simple_parallel::Pool::new(4);
     pool.for_(imgbuf.enumerate_pixels_mut(),|(x, y, pixel)|{
-        let image_x = 200;
-        let image_y = 200;
         let camera = camera_rc.clone();
         let world = world_rc.clone();
         let mut col = Vec3::new(0.0, 0.0, 0.0);
