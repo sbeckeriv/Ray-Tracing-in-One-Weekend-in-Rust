@@ -109,7 +109,6 @@ impl Scatter for Dielectric {
     }
 }
 
-
 pub struct Lambertian {
     albedo: Vec3<f32>,
 }

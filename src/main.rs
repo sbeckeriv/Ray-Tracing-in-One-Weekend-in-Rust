@@ -153,13 +153,12 @@ fn random_world() -> HitableList {
                 }
             }
         }
-        //let die1 = Rc::new(material::Dielectric::new(1.5));
-        //world.push(Sphere::new(Vec3::new(0.0, 1.0 , 0.0), 1.0, die1.clone()));
-
-        //let lam1 = Rc::new(material::Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
-        //world.push(Sphere::new(Vec3::new(0.0-4.0, 1.0 , 0.0), 4.0, lam1.clone()));
+        let die1 = Arc::new(material::Dielectric::new(1.5));
+        world.push(Sphere::new(Vec3::new(0.0, 1.0 , 0.0), 1.0, die1.clone()));
 
         let metal1= Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5),0.0));
+        world.push(Sphere::new(Vec3::new(0.0-4.0, 1.0 , 0.0), 1.0, metal1.clone()));
+
         world.push(Sphere::new(Vec3::new(4.0, 1.0 , 0.0), 1.0, metal1.clone()));
     }
     world
