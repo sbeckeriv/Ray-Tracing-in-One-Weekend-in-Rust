@@ -2,14 +2,11 @@ extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
-use std::rc::Rc;
-
 use std::sync::Arc;
 use nalgebra::Dot;
 use material::Scatter;
 
 pub struct HitableList {
-    // should use trait and generics
     pub list: Vec<Sphere>,
 }
 impl HitableList {
@@ -48,7 +45,6 @@ impl HitRecord {
     }
 }
 
-// not really the same. I should make a trait called hitable
 pub struct Sphere {
     pub center: Vec3<f32>,
     pub radius: f32,
@@ -56,7 +52,6 @@ pub struct Sphere {
 }
 unsafe impl Send for Sphere {}
 unsafe impl Sync for Sphere {}
-
 
 impl Sphere {
     pub fn new(center: Vec3<f32>, radius: f32, material: Arc<Scatter>) -> Self {
