@@ -164,8 +164,8 @@ fn random_world() -> HitableList {
     world
 }
 fn main() {
-    let image_x = 400;
-    let image_y = 400;
+    let image_x = 2000;
+    let image_y = 2000;
     let ns = 100;
 
     let random_index = Range::new(0.0, 1.0);
