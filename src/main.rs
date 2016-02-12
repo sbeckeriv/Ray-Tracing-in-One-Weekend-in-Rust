@@ -19,6 +19,48 @@ mod camera;
 use camera::Camera;
 mod material;
 
+fn main() {
+    let scene = 2;
+    let image_x = 200;
+    let image_y = 200;
+    let ns = 100;
+    let world_rc = Arc::new(random_world());
+
+    for i in 1..500{
+        let x_off = i as f32/10.0;
+        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, x_off, 0.0, 0.0));
+        let random_index = Range::new(0.0, 1.0);
+        // Create a new ImgBuf with width: imgx and height: imgy
+        let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
+        let mut pool = simple_parallel::Pool::new(6);
+        pool.for_(imgbuf.enumerate_pixels_mut(),|(x, y, pixel)|{
+            let mut rng = rand::thread_rng();
+            let camera = camera_rc.clone();
+            let world = world_rc.clone();
+            let mut col = Vec3::new(0.0, 0.0, 0.0);
+            for _ in 0..ns {
+                let rand_x = random_index.ind_sample(&mut rng);
+                let rand_y = random_index.ind_sample(&mut rng);
+                let u = (x as f32 + rand_x) / image_x as f32;
+                let v = ((image_y - 1 - y) as f32 + rand_y) / image_y as f32;
+                let ray = camera.get_ray(&u, &v);
+                col = col + color(&ray, &world, 0);
+            }
+            let base = 255.99;
+            col = col / ns as f32;
+            col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
+            *pixel = image::Rgb([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8]) ;
+        });
+        //let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
+        //let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
+        //let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
+        let ppm_file  = format!("move/scene_{}_{:04}.ppm", scene, i);
+        let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
+        let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
+        println!("done {}", i);
+    }
+}
+
 fn color(ray: &Ray, world: &HitableList, depth: usize) -> Vec3<f32> {
     match world.hit(ray, &0.001, &std::f32::MAX) {
         Some((t, material)) => {
@@ -162,45 +204,4 @@ fn random_world() -> HitableList {
         world.push(Sphere::new(Vec3::new(4.0, 1.0 , 0.0), 1.0, metal1.clone()));
     }
     world
-}
-fn main() {
-    let scene = 2;
-    let image_x = 200;
-    let image_y = 200;
-    let ns = 100;
-    let world_rc = Arc::new(random_world());
-
-    for i in 1..500{
-        let x_off = i as f32/10.0;
-        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, x_off, 0.0, 0.0));
-        let random_index = Range::new(0.0, 1.0);
-        // Create a new ImgBuf with width: imgx and height: imgy
-        let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-        let mut pool = simple_parallel::Pool::new(6);
-        pool.for_(imgbuf.enumerate_pixels_mut(),|(x, y, pixel)|{
-            let mut rng = rand::thread_rng();
-            let camera = camera_rc.clone();
-            let world = world_rc.clone();
-            let mut col = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..ns {
-                let rand_x = random_index.ind_sample(&mut rng);
-                let rand_y = random_index.ind_sample(&mut rng);
-                let u = (x as f32 + rand_x) / image_x as f32;
-                let v = ((image_y - 1 - y) as f32 + rand_y) / image_y as f32;
-                let ray = camera.get_ray(&u, &v);
-                col = col + color(&ray, &world, 0);
-            }
-            let base = 255.99;
-            col = col / ns as f32;
-            col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
-            *pixel = image::Rgb([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8]) ;
-        });
-        //let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
-        //let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
-        //let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
-        let ppm_file  = format!("move/scene_{}_{:04}.ppm", scene, i);
-        let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
-        let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
-        println!("done {}", i);
-    }
 }
