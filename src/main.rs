@@ -198,7 +198,7 @@ fn main() {
         //let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
         //let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         //let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
-        let ppm_file  = format!("move/scene_{}_{}.ppm", scene, i);
+        let ppm_file  = format!("move/scene_{}_{:04}.ppm", scene, i);
         let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
         let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
         println!("done {}", i);
