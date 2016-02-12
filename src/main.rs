@@ -21,9 +21,9 @@ mod material;
 use std::fs;
 
 fn main() {
-	let scene = 5;
-	let image_x = 200;
-	let image_y = 200;
+	let scene = 6;
+	let image_x = 400;
+	let image_y = 400;
 	let frame_count = 250;
 	let ns = 100;
 	let world_rc = Arc::new(random_world());

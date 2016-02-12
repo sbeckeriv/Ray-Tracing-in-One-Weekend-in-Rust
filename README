@@ -4,5 +4,5 @@ use https://crates.io/crates/image/ for ppm. it seems to be active. no crates? h
 Vec 3 we will use http://nalgebra.org/doc/nalgebra/struct.Vec3.html
 nalgebra = "0.5.1"
 
-
-
+Images to gif!
+convert -delay 10 -loop 0 move/4/*.ppm move/4.gif
