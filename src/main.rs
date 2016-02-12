@@ -32,7 +32,7 @@ fn main() {
 	fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
 		println!("! {:?}", why.kind());
 	});
-	for i in 1..500{
+	for i in 1..250{
 		let x_off = i as f32/10.0;
 		let camera_rc = Arc::new(normal_cam(&image_x, &image_y, 0.0, x_off, 0.0));
 		let random_index = Range::new(0.0, 1.0);
