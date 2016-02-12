@@ -14,7 +14,7 @@ pub trait Reflect{
     }
 }
 
-pub trait Scatter {
+pub trait Scatter: Send + Sync {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
 
