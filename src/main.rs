@@ -21,10 +21,11 @@ mod material;
 use std::fs;
 
 fn main() {
-    let scene = 9;
-    let image_x = 100;
-    let image_y = 100;
+    let scene = 11;
+    let image_x = 200;
+    let image_y = 200;
     let frame_count = 250;
+    let frame_count_string = format!("{}",frame_count);
     let ns = 100;
     let world_rc = Arc::new(random_world());
 
@@ -38,7 +39,7 @@ fn main() {
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-        let mut pool = simple_parallel::Pool::new(6);
+        let mut pool = simple_parallel::Pool::new(100);
         pool.for_(imgbuf.enumerate_pixels_mut(), |(x, y, pixel)| {
             let mut rng = rand::thread_rng();
             let camera = camera_rc.clone();
@@ -60,7 +61,7 @@ fn main() {
         // let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
         // let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         // let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
-        let ppm_file = format!("move/{}/scene_{:04}.ppm", scene, i);
+        let ppm_file = format!("move/{}/scene_{:02$}.ppm", scene, i, frame_count_string.len());
         let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
         let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
         println!("done {}", i);
