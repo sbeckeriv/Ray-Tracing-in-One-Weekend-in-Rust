@@ -38,7 +38,7 @@ fn main() {
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-        let mut pool = simple_parallel::Pool::new(100);
+        let mut pool = simple_parallel::Pool::new(8);
         pool.for_(imgbuf.enumerate_pixels_mut(), |(x, y, pixel)| {
             let mut rng = rand::thread_rng();
             let camera = camera_rc.clone();
