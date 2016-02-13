@@ -6,7 +6,6 @@ extern crate simple_parallel;
 use rand::distributions::{IndependentSample, Range};
 use na::Vec3;
 use std::sync::Arc;
-use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
 mod utils;
@@ -24,7 +23,7 @@ fn main() {
     let scene = 11;
     let image_x = 200;
     let image_y = 200;
-    let frame_count = 250;
+    let frame_count = 30;
     let frame_count_string = format!("{}",frame_count);
     let ns = 100;
     let world_rc = Arc::new(random_world());
@@ -33,9 +32,9 @@ fn main() {
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
-    for i in 1..frame_count {
+    for i in 0..frame_count {
         let x_off = i as f32 / 10.0;
-        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, 0.0, 0.0, x_off));
+        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, x_off, 0.0, 0.0));
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
@@ -62,9 +61,10 @@ fn main() {
         // let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         // let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
         let ppm_file = format!("move/{}/scene_{:02$}.ppm", scene, i, frame_count_string.len());
+
         let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
         let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
-        println!("done {}", i);
+        println!("done {}", ppm_file);
     }
 }
 
@@ -90,7 +90,7 @@ fn color(ray: &Ray, world: &HitableList, depth: usize) -> Vec3<f32> {
     }
 }
 
-fn normal_cam2(image_x: &u32, image_y: &u32) -> Camera {
+fn normal_cam2(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
     let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
     let horizon = Vec3::new(4.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
@@ -98,7 +98,7 @@ fn normal_cam2(image_x: &u32, image_y: &u32) -> Camera {
     let look_from = Vec3::new(3.0, 3.0, 2.0);
     let look_at = Vec3::new(0.0, 0.0, 0.0 - 1.0);
     let distance = (look_from - look_at).len() as f32;
-    let aperture = 2.0;
+    let aperture = 0.0;
     Camera::new_focus(look_from,
                       look_at,
                       Vec3::new(0.0, 1.0, 0.0),
@@ -110,31 +110,23 @@ fn normal_cam2(image_x: &u32, image_y: &u32) -> Camera {
 
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
 
-    let look_from = Vec3::new(0.0 - 4.0, 3.5, 0.0 - 2.0);
-    let look_at = Vec3::new(0.0 + offset_x, 0.0 + offset_y, 0.0 - 1.0 + offset_z);
-    let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
-    let horizon = Vec3::new(4.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
+    let look_from = Vec3::new(10.0+offset_x, 2.0 + offset_y, 15.0+ offset_z);
+    let look_at = Vec3::new(0.0 , 0.0+offset_x, 0.0 - 4.0 );
+    let lower_left_corner = Vec3::new(0.0 - 10.0, 0.0 - 0.0, 0.0 - 0.0);
+    let horizon = Vec3::new(10.0, 0.0, 10.0);
+    let vertical = Vec3::new(20.0, 20.0, 20.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
 
-    Camera::new_positionable(look_from,
-                             look_at,
-                             Vec3::new(0.0, 1.0, 0.0),
-                             90.0,
-                             *image_x as f32 / *image_y as f32)
-}
+    let distance = (look_from - look_at).len() as f32;
+    let aperture = 0.0;
+    Camera::new_focus(look_from,
+                      look_at,
+                      Vec3::new(0.0, 1.0, 0.0),
+                      20.0,
+                      *image_x as f32 / *image_y as f32,
+                      aperture,
+                      distance)
 
-fn test_cam(image_x: &u32, image_y: &u32) -> Camera {
-    let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
-    let horizon = Vec3::new(4.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-
-    Camera::new_positionable(Vec3::new(0.0 - 2.0, 2.0, 1.0),
-    Vec3::new(0.0, 0.0, 0.0 - 1.0),
-    Vec3::new(0.0, 1.0, 0.0),
-    90.0,
-    *image_x as f32 / *image_y as f32)
 }
 // fn world() -> HitableList {
 // let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
