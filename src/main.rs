@@ -111,7 +111,7 @@ fn normal_cam2(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offse
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
 
     let look_from = Vec3::new(10.0+offset_x, 2.0 + offset_y, 15.0+ offset_z);
-    let look_at = Vec3::new(0.0 , 0.0+offset_x, 0.0 - 4.0 );
+    let look_at = Vec3::new(0.0 , 0.0+offset_x*4.0, 0.0 - 4.0 );
     let lower_left_corner = Vec3::new(0.0 - 10.0, 0.0 - 0.0, 0.0 - 0.0);
     let horizon = Vec3::new(10.0, 0.0, 10.0);
     let vertical = Vec3::new(20.0, 20.0, 20.0);
