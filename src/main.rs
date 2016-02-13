@@ -21,7 +21,7 @@ mod material;
 use std::fs;
 
 fn main() {
-    let scene = 8;
+    let scene = 9;
     let image_x = 100;
     let image_y = 100;
     let frame_count = 250;
@@ -34,7 +34,7 @@ fn main() {
     });
     for i in 1..frame_count {
         let x_off = i as f32 / 10.0;
-        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, 0.0, x_off, 0.0));
+        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, 0.0, 0.0, x_off));
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
