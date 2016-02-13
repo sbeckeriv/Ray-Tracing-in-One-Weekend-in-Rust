@@ -20,11 +20,11 @@ mod material;
 use std::fs;
 
 fn main() {
-    let scene = 11;
+    let scene = 12;
     let image_x = 200;
     let image_y = 200;
-    let frame_count = 30;
-    let frame_count_string = format!("{}",frame_count);
+    let frame_count = 250;
+    let frame_count_string = format!("{}", frame_count);
     let ns = 100;
     let world_rc = Arc::new(random_world());
 
@@ -60,7 +60,10 @@ fn main() {
         // let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
         // let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         // let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
-        let ppm_file = format!("move/{}/scene_{:02$}.ppm", scene, i, frame_count_string.len());
+        let ppm_file = format!("move/{}/scene_{:02$}.ppm",
+                               scene,
+                               i,
+                               frame_count_string.len());
 
         let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
         let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
@@ -90,32 +93,28 @@ fn color(ray: &Ray, world: &HitableList, depth: usize) -> Vec3<f32> {
     }
 }
 
-fn normal_cam2(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
-    let lower_left_corner = Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0);
-    let horizon = Vec3::new(4.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-    let look_from = Vec3::new(3.0, 3.0, 2.0);
-    let look_at = Vec3::new(0.0, 0.0, 0.0 - 1.0);
-    let distance = (look_from - look_at).len() as f32;
-    let aperture = 0.0;
-    Camera::new_focus(look_from,
-                      look_at,
-                      Vec3::new(0.0, 1.0, 0.0),
-                      20.0,
-                      *image_x as f32 / *image_y as f32,
-                      aperture,
-                      distance)
-}
+fn normal_cam2(image_x: &u32,
+               image_y: &u32,
+               offset_x: f32,
+               offset_y: f32,
+               offset_z: f32)
+    -> Camera {
+        let look_from = Vec3::new(3.0 + offset_x, 3.0 + offset_y, 2.0 + offset_z);
+        let look_at = Vec3::new(0.0, 0.0, 0.0 - 1.0);
+        let distance = (look_from - look_at).len() as f32;
+        let aperture = 0.0;
+        Camera::new_focus(look_from,
+                          look_at,
+                          Vec3::new(0.0, 1.0, 0.0),
+                          20.0,
+                          *image_x as f32 / *image_y as f32,
+                          aperture,
+                          distance)
+    }
 
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
-
-    let look_from = Vec3::new(10.0+offset_x, 2.0 + offset_y, 15.0+ offset_z);
-    let look_at = Vec3::new(0.0 , 0.0+offset_x*4.0, 0.0 - 4.0 );
-    let lower_left_corner = Vec3::new(0.0 - 10.0, 0.0 - 0.0, 0.0 - 0.0);
-    let horizon = Vec3::new(10.0, 0.0, 10.0);
-    let vertical = Vec3::new(20.0, 20.0, 20.0);
-    let origin = Vec3::new(0.0, 0.0, 0.0);
+    let look_from = Vec3::new(3.0, 3.0 + offset_y, 2.0 + offset_z);
+    let look_at = Vec3::new(0.0 + offset_x * 4.0, 0.0, 0.0 - 1.0);
 
     let distance = (look_from - look_at).len() as f32;
     let aperture = 0.0;
@@ -128,31 +127,7 @@ fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset
                       distance)
 
 }
-// fn world() -> HitableList {
-// let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.3, 0.3)));
-// let mat2 = Rc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
-// let metal1 = Rc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
-// let die1 = Rc::new(material::Dielectric::new(1.5));
-//
-// let mut world = HitableList::new();
-// world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, mat1.clone()));
-// world.push(Sphere::new(Vec3::new(0.0, 0.0 - 100.5, 0.0 - 1.0), 100.0, mat2.clone()));
-// world.push(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
-// world.push(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
-// world
-// }
-//
-// fn world2() -> HitableList {
-// camera red blue balls
-// let r = (f32::consts::PI / 4.0).cos();
-// let mat1 = Rc::new(material::Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
-// let mat2 = Rc::new(material::Lambertian::new(Vec3::new(1.0, 0.0, 0.0)));
-// let mut world = HitableList::new();
-// world.push(Sphere::new(Vec3::new(r * (0.0 - 1.0), 0.0, 0.0 - 1.0), r, mat1.clone()));
-// world.push(Sphere::new(Vec3::new(r, 0.0, 0.0 - 1.0), r, mat2.clone()));
-// world
-// }
-//
+
 fn random_world() -> HitableList {
     let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
