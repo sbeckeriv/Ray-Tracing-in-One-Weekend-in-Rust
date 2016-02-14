@@ -7,7 +7,7 @@ use nalgebra::Dot;
 use material::Scatter;
 
 pub struct HitableList {
-    pub list: Vec<Sphere>,
+    pub list: Vec<Arc<Hitable>>,
 }
 impl HitableList {
     // I think can do a from/to vec to hitable maybe. for now give it nothing and push
@@ -15,7 +15,7 @@ impl HitableList {
         let list = Vec::new();
         HitableList { list: list }
     }
-    pub fn push(&mut self, sphere: Sphere) {
+    pub fn push(&mut self, sphere: Arc<Hitable>) {
         self.list.push(sphere);
     }
     pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<(HitRecord, Arc<Scatter>)> {
@@ -24,7 +24,7 @@ impl HitableList {
         for object in &self.list {
             if let Some(record) = object.hit(ray, t_min, &closest_so_far) {
                 closest_so_far = record.t;
-                last_hit = Some((record, object.material.clone()));
+                last_hit = Some((record, object.material()));
             }
         }
         last_hit
@@ -48,7 +48,12 @@ impl HitRecord {
 pub struct Sphere {
     pub center: Vec3<f32>,
     pub radius: f32,
-    pub material: Arc<Scatter>,
+    material: Arc<Scatter>,
+}
+
+pub trait Hitable: Send + Sync{
+    fn material(&self) -> Arc<Scatter>;
+    fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord>;
 }
 
 impl Sphere {
@@ -59,8 +64,12 @@ impl Sphere {
             material: material,
         }
     }
-
-    pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
+}
+impl Hitable for Sphere {
+    fn material(&self) -> Arc<Scatter> {
+        self.material.clone()
+    }
+    fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
         let origin = ray.origin;
         let direction = ray.direction;
         let oc = origin - self.center;

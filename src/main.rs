@@ -1,8 +1,8 @@
 extern crate image;
 extern crate nalgebra;
 extern crate nalgebra as na;
-extern crate rand;
 extern crate simple_parallel;
+extern crate rand;
 use rand::distributions::{IndependentSample, Range};
 use na::Vec3;
 use std::sync::Arc;
@@ -20,10 +20,10 @@ mod material;
 use std::fs;
 
 fn main() {
-    let scene = 12;
+    let scene = 13;
     let image_x = 200;
     let image_y = 200;
-    let frame_count = 250;
+    let frame_count = 1;
     let frame_count_string = format!("{}", frame_count);
     let ns = 100;
     let world_rc = Arc::new(random_world());
@@ -32,6 +32,7 @@ fn main() {
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
+
     for i in 0..frame_count {
         let x_off = i as f32 / 10.0;
         let camera_rc = Arc::new(normal_cam(&image_x, &image_y, x_off, 0.0, 0.0));
@@ -109,7 +110,7 @@ fn normal_cam2(image_x: &u32,
                           20.0,
                           *image_x as f32 / *image_y as f32,
                           aperture,
-                          distance)
+                          distance, 0.0 ,0.0)
     }
 
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
@@ -121,10 +122,10 @@ fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset
     Camera::new_focus(look_from,
                       look_at,
                       Vec3::new(0.0, 1.0, 0.0),
-                      20.0,
+                      55.0,
                       *image_x as f32 / *image_y as f32,
                       aperture,
-                      distance)
+                      distance, 0.0, 0.0)
 
 }
 
@@ -134,9 +135,10 @@ fn random_world() -> HitableList {
     let random_size_index = Range::new(0.03, 0.55);
     let mut world = HitableList::new();
     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
-    world.push(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0),
+    let sphere = Arc::new(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0),
     1000.0,
     base_mat.clone()));
+    world.push(sphere.clone());
     let minus_vec = Vec3::new(4.0, 0.2, 0.0);
     for a in (0 - 21)..22 {
         for b in (0 - 11)..22 {
@@ -146,13 +148,13 @@ fn random_world() -> HitableList {
             0.2,
             b as f32 * 0.9 * random_index.ind_sample(&mut rng));
             if (center - minus_vec).len() as f32 > 0.9 {
-                if rand_mat < 0.8 {
+                let sphere = if rand_mat < 0.8 {
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let three = random_index.ind_sample(&mut rng) *
                         random_index.ind_sample(&mut rng);
                     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(one, two, three)));
-                    world.push(Sphere::new(center, rand_size, base_mat.clone()));
+                    Arc::new(Sphere::new(center, rand_size, base_mat.clone()))
                 } else if rand_mat < 0.95 {
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
@@ -164,20 +166,24 @@ fn random_world() -> HitableList {
                     0.5 * (1.0 + two),
                     0.5 * (1.0 + three)),
                     0.5 * four));
-                    world.push(Sphere::new(center, rand_size, base_mat.clone()));
+                    Arc::new(Sphere::new(center, rand_size, base_mat.clone()))
                 } else {
                     let base_mat = Arc::new(material::Dielectric::new(1.5));
-                    world.push(Sphere::new(center, rand_size, base_mat.clone()));
-                }
+                    Arc::new(Sphere::new(center, rand_size, base_mat.clone()))
+                };
+                world.push(sphere.clone());
             }
         }
         let die1 = Arc::new(material::Dielectric::new(1.5));
-        world.push(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, die1.clone()));
+        let sphere = Arc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, die1.clone()));
+        world.push(sphere.clone());
 
         let metal1 = Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
-        world.push(Sphere::new(Vec3::new(0.0 - 4.0, 1.0, 0.0), 1.0, metal1.clone()));
+        let sphere = Arc::new(Sphere::new(Vec3::new(0.0 - 4.0, 1.0, 0.0), 1.0, metal1.clone()));
+        world.push(sphere.clone());
 
-        world.push(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
+        let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
+        world.push(sphere.clone());
     }
     world
 }

@@ -45,7 +45,7 @@ impl Scatter for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let unit_directon = unit_vector(&r_in.direction);
         let reflected = self.reflect(&unit_directon, &rec.normal);
-        let scarttered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz);
+        let scarttered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz, 0.0);
         if scarttered.direction.dot(&rec.normal) > 0.0 {
             Some((self.albedo, scarttered))
         } else {
@@ -102,9 +102,9 @@ impl Scatter for Dielectric {
         let random = random_index.ind_sample(&mut rand);
         if random < reflect_prob {
             let reflected = self.reflect(&r_in.direction, &rec.normal);
-            Some((attenuation, Ray::new(rec.p, reflected)))
+            Some((attenuation, Ray::new(rec.p, reflected, 0.0)))
         } else {
-            Some((attenuation, Ray::new(rec.p, refracted.unwrap())))
+            Some((attenuation, Ray::new(rec.p, refracted.unwrap(), 0.0)))
         }
     }
 }
@@ -121,7 +121,7 @@ impl Lambertian {
 impl Scatter for Lambertian {
     fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let target = rec.p + rec.normal + random_in_unit_sphere();
-        let scarttered = Ray::new(rec.p, target - rec.p);
+        let scarttered = Ray::new(rec.p, target - rec.p, 0.0);
         Some((self.albedo, scarttered))
     }
 }
