@@ -38,6 +38,43 @@ impl MovingSphere {
     }
 }
 
+impl Hitable for MovingSphere {
+    fn material(&self) -> Arc<Scatter> {
+        self.material.clone()
+    }
+    fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
+        let origin = ray.origin;
+        let direction = ray.direction;
+        let mut return_value: Option<HitRecord> = None;
+        let center_at_time = self.center(ray.time);
+
+        let oc = origin - center_at_time;
+        let a = direction.dot(&direction);
+        let b = oc.dot(&direction);
+        let c = oc.dot(&oc) - self.radius * self.radius;
+        let discriminate = b * b - a * c;
+        if discriminate > 0.0 {
+            let sqrt_discriminate = discriminate.sqrt();
+            let temp = ((0.0 - b) - sqrt_discriminate) / a;
+            if temp < *t_max && temp > *t_min {
+                let point = ray.point_at_parameter(temp);
+                let normal = (point - center_at_time) / self.radius;
+                let hit = HitRecord::new(temp, point, normal);
+                return_value = Some(hit)
+            } else {
+                let temp = ((0.0 - b) + sqrt_discriminate) / a;
+                if temp < *t_max && temp > *t_min {
+                    let point = ray.point_at_parameter(temp);
+                    let normal = (point - center_at_time) / self.radius;
+                    let hit = HitRecord::new(temp, point, normal);
+                    return_value = Some(hit)
+                }
+            }
+        };
+        return_value
+    }
+}
+
 pub struct Sphere {
     pub center: Vec3<f32>,
     pub radius: f32,

@@ -14,7 +14,7 @@ mod ray;
 use ray::Ray;
 mod objects;
 use objects::{HitableList, sphere};
-use objects::sphere::Sphere;
+use objects::sphere::{MovingSphere, Sphere};
 mod camera;
 use camera::Camera;
 mod material;
@@ -111,7 +111,9 @@ fn normal_cam2(image_x: &u32,
                           20.0,
                           *image_x as f32 / *image_y as f32,
                           aperture,
-                          distance, 0.0 ,0.0)
+                          distance,
+                          0.0,
+                          0.0)
     }
 
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
@@ -126,7 +128,9 @@ fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset
                       55.0,
                       *image_x as f32 / *image_y as f32,
                       aperture,
-                      distance, 0.0, 0.0)
+                      distance,
+                      0.0,
+                      0.0)
 
 }
 
@@ -141,15 +145,31 @@ fn random_world() -> HitableList {
     base_mat.clone()));
     world.push(sphere.clone());
     let minus_vec = Vec3::new(4.0, 0.2, 0.0);
-    for a in (0 - 21)..22 {
-        for b in (0 - 11)..22 {
+    for a in (0 - 11)..12 {
+        for b in (0 - 11)..12 {
             let rand_size = random_size_index.ind_sample(&mut rng);
             let rand_mat = random_index.ind_sample(&mut rng);
             let center = Vec3::new(a as f32 + 0.9 * random_index.ind_sample(&mut rng),
             0.2,
             b as f32 * 0.9 * random_index.ind_sample(&mut rng));
             if (center - minus_vec).len() as f32 > 0.9 {
-                let sphere = if rand_mat < 0.8 {
+                let sphere:Arc<objects::Hitable> = if rand_mat < 0.79 {
+
+                    let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
+                    let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
+                    let three = random_index.ind_sample(&mut rng) *
+                        random_index.ind_sample(&mut rng);
+                    let base_mat = Arc::new(material::Lambertian::new(Vec3::new(one, two, three)));
+                    let center1 = center +
+                        Vec3::new(0.0, 0.5 , 0.0);
+
+                    Arc::new(MovingSphere::new(center,
+                                               center1,
+                                               rand_size,
+                                               base_mat.clone(),
+                                               0.0,
+                                               1.0))
+                } else if rand_mat < 0.8 {
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let three = random_index.ind_sample(&mut rng) *
