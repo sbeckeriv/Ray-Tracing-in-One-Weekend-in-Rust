@@ -6,7 +6,37 @@ use std::sync::Arc;
 use nalgebra::Dot;
 use material::Scatter;
 use objects::{HitRecord, Hitable};
+pub struct MovingSphere {
+    pub center0: Vec3<f32>,
+    pub center1: Vec3<f32>,
+    pub radius: f32,
+    material: Arc<Scatter>,
+    pub time0: f32,
+    pub time1: f32,
+}
 
+impl MovingSphere {
+    pub fn new(center0: Vec3<f32>,
+               center1: Vec3<f32>,
+               radius: f32,
+               material: Arc<Scatter>,
+               time0: f32,
+               time1: f32)
+               -> Self {
+        MovingSphere {
+            center0: center0,
+            center1: center1,
+            radius: radius,
+            material: material,
+            time0: time0,
+            time1: time1,
+        }
+    }
+    pub fn center(&self, time: f32) -> Vec3<f32> {
+        self.center0 +
+        (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
+    }
+}
 
 pub struct Sphere {
     pub center: Vec3<f32>,
