@@ -130,7 +130,7 @@ fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset
                       aperture,
                       distance,
                       0.0,
-                      0.0)
+                      1.0)
 
 }
 
