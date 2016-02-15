@@ -40,7 +40,7 @@ fn main() {
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-        let mut pool = simple_parallel::Pool::new(108);
+        let mut pool = simple_parallel::Pool::new(1208);
         for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
             let mut shared_col = Arc::new(Mutex::new(Vec3::new(0.0, 0.0, 0.0)));
             pool.for_((0..ns), |_| {
