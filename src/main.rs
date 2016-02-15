@@ -40,9 +40,10 @@ fn main() {
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-        let mut pool = simple_parallel::Pool::new(1208);
-        for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+        let mut pool1 = simple_parallel::Pool::new(10);
+        pool1.for_(imgbuf.enumerate_pixels_mut(),|(x, y, pixel)|{
             let mut shared_col = Arc::new(Mutex::new(Vec3::new(0.0, 0.0, 0.0)));
+            let mut pool = simple_parallel::Pool::new(10);
             pool.for_((0..ns), |_| {
                 let mut rng = rand::thread_rng();
                 let rand_x = random_index.ind_sample(&mut rng);
@@ -59,7 +60,7 @@ fn main() {
             let col_avg = *col / ns as f32;
             let adjusted_col = Vec3::new(col_avg.x.sqrt(), col_avg.y.sqrt(), col_avg.z.sqrt());
             *pixel = image::Rgb([(base * adjusted_col.x) as u8, (base * adjusted_col.y) as u8, (base * adjusted_col.z) as u8]);
-        };
+        });
         // let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
         // let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         // let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
