@@ -5,7 +5,7 @@ extern crate simple_parallel;
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
 use na::Vec3;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::fs::File;
 use std::path::Path;
 mod utils;
@@ -40,23 +40,26 @@ fn main() {
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-        let mut pool = simple_parallel::Pool::new(8);
-        pool.for_(imgbuf.enumerate_pixels_mut(), |(x, y, pixel)| {
-            let mut rng = rand::thread_rng();
-            let mut col = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..ns {
+        let mut pool = simple_parallel::Pool::new(108);
+        for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+            let mut shared_col = Arc::new(Mutex::new(Vec3::new(0.0, 0.0, 0.0)));
+            pool.for_((0..ns), |_| {
+                let mut rng = rand::thread_rng();
                 let rand_x = random_index.ind_sample(&mut rng);
                 let rand_y = random_index.ind_sample(&mut rng);
                 let u = (x as f32 + rand_x) / image_x as f32;
                 let v = ((image_y - 1 - y) as f32 + rand_y) / image_y as f32;
                 let ray = camera.get_ray(&u, &v);
-                col = col + color(&ray, &world, 0);
-            }
+                let mut col = shared_col.lock().unwrap();
+                *col = *col + color(&ray, &world, 0);
+            });
             let base = 255.99;
-            col = col / ns as f32;
-            col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
-            *pixel = image::Rgb([(base * col.x) as u8, (base * col.y) as u8, (base * col.z) as u8]);
-        });
+
+            let mut col = shared_col.lock().unwrap();
+            let col_avg = *col / ns as f32;
+            let adjusted_col = Vec3::new(col_avg.x.sqrt(), col_avg.y.sqrt(), col_avg.z.sqrt());
+            *pixel = image::Rgb([(base * adjusted_col.x) as u8, (base * adjusted_col.y) as u8, (base * adjusted_col.z) as u8]);
+        };
         // let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
         // let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         // let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
