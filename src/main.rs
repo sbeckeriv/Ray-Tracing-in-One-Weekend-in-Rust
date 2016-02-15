@@ -21,13 +21,13 @@ mod material;
 use std::fs;
 
 fn main() {
-    let scene = 13;
+    let scene = 16;
     let image_x = 200;
     let image_y = 100;
     let frame_count = 1;
     let frame_count_string = format!("{}", frame_count);
     let ns = 100;
-    let world_rc = Arc::new(three_world());
+    let world = random_world();
 
     println!("mkdir");
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
@@ -36,15 +36,13 @@ fn main() {
 
     for i in 0..frame_count {
         let x_off = i as f32 / 10.0;
-        let camera_rc = Arc::new(head_on_cam(&image_x, &image_y, x_off, 0.0, 0.0));
+        let camera = normal_cam(&image_x, &image_y, x_off, 0.0, 0.0);
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
         let mut pool = simple_parallel::Pool::new(8);
         pool.for_(imgbuf.enumerate_pixels_mut(), |(x, y, pixel)| {
             let mut rng = rand::thread_rng();
-            let camera = camera_rc.clone();
-            let world = world_rc.clone();
             let mut col = Vec3::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
                 let rand_x = random_index.ind_sample(&mut rng);
@@ -127,7 +125,7 @@ fn head_on_cam(image_x: &u32,
 
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
     let look_from = Vec3::new(3.0, 3.0 + offset_y, 2.0 + offset_z);
-    let look_at = Vec3::new(0.0 + offset_x * 4.0, 0.0, 0.0 - 1.0);
+    let look_at = Vec3::new(0.0 + offset_x , 0.0, 0.0-1.0 );
 
     let distance = (look_from - look_at).len() as f32;
     let aperture = 0.0;
@@ -183,7 +181,7 @@ fn random_world() -> HitableList {
             0.2,
             b as f32 * 0.9 * random_index.ind_sample(&mut rng));
             if (center - minus_vec).len() as f32 > 0.9 {
-                let sphere: Arc<objects::Hitable> = if rand_mat < 0.79 {
+                let sphere: Arc<objects::Hitable> = if rand_mat < 0.1 {
 
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
@@ -229,10 +227,10 @@ fn random_world() -> HitableList {
         world.push(sphere.clone());
 
         let metal1 = Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
-        let sphere = Arc::new(Sphere::new(Vec3::new(0.0 - 4.0, 1.0, 0.0), 1.0, metal1.clone()));
+        let sphere = Arc::new(Sphere::new(Vec3::new(0.0 - 4.0, 1.0, 0.0), 1.0, die1.clone()));
         world.push(sphere.clone());
 
-        let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
+        let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, die1.clone()));
         world.push(sphere.clone());
     }
     world
