@@ -21,6 +21,40 @@ pub struct Camera {
 }
 
 impl Camera {
+    pub fn new_set() -> Self {
+
+        let vup = Vec3::new(0.0, 0.0, 0.0);
+        let vfov = 1.0;
+        let aspect = 45.0;
+        let aperture = 0.0;
+        let focus_dist = 0.0;
+        let time0 = 0.0;
+        let time1 = 0.0;
+        let look_from = Vec3::new(1.0, 0.0, 0.0);
+        let look_at = Vec3::new(0.0, 0.0, 0.0);
+
+        let lens_raidus = aperture / 2.0;
+        let theta = vfov * f32::consts::PI / 180.0;
+        let half_height = (theta / 2.0).tan();
+        let half_width = aspect * half_height;
+        let looking = look_from - look_at;
+        let w = unit_vector(&looking);
+        let u = nalgebra::cross(&vup, &w);
+        let v = nalgebra::cross(&w, &u);
+        Camera {
+            lower_left_corner: Vec3::new(0.0 - 2.0, 0.0 - 1.0, 0.0 - 1.0),
+            origin: Vec3::new(0.0, 0.0, 0.0),
+            horizon: Vec3::new(4.0, 0.0, 0.0),
+            vertical: Vec3::new(0.0, 2.0, 0.0),
+            lens_raidus: lens_raidus,
+            u: u,
+            v: v,
+            w: w,
+            time0: time0,
+            time1: time1,
+        }
+
+    }
     pub fn new_focus(look_from: Vec3<f32>,
                      look_at: Vec3<f32>,
                      vup: Vec3<f32>,

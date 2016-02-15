@@ -23,11 +23,11 @@ use std::fs;
 fn main() {
     let scene = 13;
     let image_x = 200;
-    let image_y = 200;
+    let image_y = 100;
     let frame_count = 1;
     let frame_count_string = format!("{}", frame_count);
     let ns = 100;
-    let world_rc = Arc::new(random_world());
+    let world_rc = Arc::new(three_world());
 
     println!("mkdir");
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
@@ -36,7 +36,7 @@ fn main() {
 
     for i in 0..frame_count {
         let x_off = i as f32 / 10.0;
-        let camera_rc = Arc::new(normal_cam(&image_x, &image_y, x_off, 0.0, 0.0));
+        let camera_rc = Arc::new(head_on_cam(&image_x, &image_y, x_off, 0.0, 0.0));
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
@@ -116,6 +116,15 @@ fn normal_cam2(image_x: &u32,
                           0.0)
     }
 
+fn head_on_cam(image_x: &u32,
+               image_y: &u32,
+               offset_x: f32,
+               offset_y: f32,
+               offset_z: f32)
+    -> Camera {
+        Camera::new_set()
+    }
+
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
     let look_from = Vec3::new(3.0, 3.0 + offset_y, 2.0 + offset_z);
     let look_at = Vec3::new(0.0 + offset_x * 4.0, 0.0, 0.0 - 1.0);
@@ -132,6 +141,27 @@ fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset
                       0.0,
                       1.0)
 
+}
+
+fn three_world() -> HitableList {
+    let mut world = HitableList::new();
+    let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
+    let sphere = Arc::new(Sphere::new(Vec3::new(0.0, (0.0 - 100.5), 0.0), 100.0, base_mat.clone()));
+    world.push(sphere.clone());
+
+
+    let lam1 = Arc::new(material::Lambertian::new(Vec3::new(0.1, 0.2, 0.5)));
+    let sphere = Arc::new(Sphere::new(Vec3::new(0.0, 0.0, 0.0 - 1.0), 0.5, lam1.clone()));
+    world.push(sphere.clone());
+
+    let metal1 = Arc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
+    let sphere = Arc::new(Sphere::new(Vec3::new(1.0, 0.0, 0.0 - 1.0), 0.5, metal1.clone()));
+    world.push(sphere.clone());
+
+    let die1 = Arc::new(material::Dielectric::new(1.5));
+    let sphere = Arc::new(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
+    world.push(sphere.clone());
+    world
 }
 
 fn random_world() -> HitableList {
@@ -153,15 +183,14 @@ fn random_world() -> HitableList {
             0.2,
             b as f32 * 0.9 * random_index.ind_sample(&mut rng));
             if (center - minus_vec).len() as f32 > 0.9 {
-                let sphere:Arc<objects::Hitable> = if rand_mat < 0.79 {
+                let sphere: Arc<objects::Hitable> = if rand_mat < 0.79 {
 
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let three = random_index.ind_sample(&mut rng) *
                         random_index.ind_sample(&mut rng);
                     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(one, two, three)));
-                    let center1 = center +
-                        Vec3::new(0.0, 0.5 , 0.0);
+                    let center1 = center + Vec3::new(0.0, 0.5, 0.0);
 
                     Arc::new(MovingSphere::new(center,
                                                center1,
