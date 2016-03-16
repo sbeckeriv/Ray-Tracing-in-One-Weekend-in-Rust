@@ -124,15 +124,15 @@ fn head_on_cam(image_x: &u32,
     }
 
 fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
-    let look_from = Vec3::new(3.0, 3.0 + offset_y, 2.0 + offset_z);
-    let look_at = Vec3::new(0.0 + offset_x , 0.0, 0.0-1.0 );
+    let look_from = Vec3::new(13.0, 2.0 + offset_y, 3.0 + offset_z);
+    let look_at = Vec3::new(0.0 + offset_x , 0.0, 0.0 );
 
-    let distance = (look_from - look_at).len() as f32;
+    let distance = 10.0;
     let aperture = 0.0;
     Camera::new_focus(look_from,
                       look_at,
                       Vec3::new(0.0, 1.0, 0.0),
-                      55.0,
+                      20.0,
                       *image_x as f32 / *image_y as f32,
                       aperture,
                       distance,
@@ -230,7 +230,7 @@ fn random_world() -> HitableList {
         let sphere = Arc::new(Sphere::new(Vec3::new(0.0 - 4.0, 1.0, 0.0), 1.0, die1.clone()));
         world.push(sphere.clone());
 
-        let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, die1.clone()));
+        let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
         world.push(sphere.clone());
     }
     world
