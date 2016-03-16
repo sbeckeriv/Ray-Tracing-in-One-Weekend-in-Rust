@@ -1,5 +1,6 @@
-use https://crates.io/crates/image/ for ppm. it seems to be active. no crates? http://rosettacode.org/wiki/Bitmap/Write_a_PPM_file#Rust
+Objects lazily use pub. they really should not.
 
+use https://crates.io/crates/image/ for ppm. it seems to be active. no crates? http://rosettacode.org/wiki/Bitmap/Write_a_PPM_file#Rust
 
 Vec 3 we will use http://nalgebra.org/doc/nalgebra/struct.Vec3.html
 nalgebra = "0.5.1"
