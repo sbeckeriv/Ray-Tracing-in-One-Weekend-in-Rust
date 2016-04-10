@@ -1,7 +1,9 @@
 extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;
+use aabb::AABB;
 use ray::Ray;
+use utils::{ffmax, ffmin};
 use std::sync::Arc;
 use nalgebra::Dot;
 use material::Scatter;
@@ -73,6 +75,11 @@ impl Hitable for MovingSphere {
         };
         return_value
     }
+    fn bounding_box(&self, t0: f32, t1: f32) -> AABB {
+        let one = self.center0 - Vec3::new(self.radius, self.radius, self.radius);
+        let two = self.center0 + Vec3::new(self.radius, self.radius, self.radius);
+        AABB::new(one, two)
+    }
 }
 
 pub struct Sphere {
@@ -93,6 +100,11 @@ impl Sphere {
 impl Hitable for Sphere {
     fn material(&self) -> Arc<Scatter> {
         self.material.clone()
+    }
+    fn bounding_box(&self, t0: f32, t1: f32) -> AABB {
+        let one = self.center - Vec3::new(self.radius, self.radius, self.radius);
+        let two = self.center + Vec3::new(self.radius, self.radius, self.radius);
+        AABB::new(one, two)
     }
     fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
         let origin = ray.origin;

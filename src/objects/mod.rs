@@ -4,11 +4,14 @@ use na::Vec3;
 use ray::Ray;
 use std::sync::Arc;
 use material::Scatter;
+use aabb::AABB;
 pub mod sphere;
+pub mod bvh;
 
 pub trait Hitable: Send + Sync{
     fn material(&self) -> Arc<Scatter>;
     fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord>;
+    fn bounding_box(&self, t0: f32, t1: f32) -> AABB;
 }
 
 pub struct HitableList {
