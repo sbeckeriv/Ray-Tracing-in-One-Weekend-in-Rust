@@ -30,6 +30,7 @@ impl Node {
     }
     fn hits(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitDirection {
         let mut hit = true;
+        //Moved from aabb
         for a in (0..3) {
             let t0 = ffmin((self.min[a] - ray.origin[a]) / ray.direction[a],
                            (self.max[a] - ray.origin[a]) / ray.direction[a]);
@@ -43,17 +44,11 @@ impl Node {
             }
         }
         if hit {
-            let left_hit = if self.left.is_some() {
-                self.left.hits(ray, t_min, t_max)
-            } else {
-                HitDirection::Miss
-            };
-            let right_hit = if self.right.is_some() {
-                self.right.hits(ray, t_min, t_max)
-            } else {
-                HitDirection::Miss
-            };
-            match (left_hit, right_hit) {
+            match (
+                self.left.map_or(HitDirection::Miss, |n| n.hits(ray, t_min, t_max)),
+                self.right.map_or(HitDirection::Miss, |n| n.hits(ray, t_min, t_max))
+
+                   ) {
                 (HitDirection::Miss, HitDirection::Miss) => HitDirection::End,
                 (left, HitDirection::Miss) => HitDirection::Left,
                 (HitDirection::Miss, right) => HitDirection::Right,
