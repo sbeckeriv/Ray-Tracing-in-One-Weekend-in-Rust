@@ -196,12 +196,12 @@ fn random_world() -> HitableList {
                                    0.2,
                                    b as f32 * 0.9 * random_index.ind_sample(&mut rng));
             if (center - minus_vec).len() as f32 > 0.92 {
-                let sphere: Arc<objects::Hitable> = if rand_mat < 0.01 {
+                let sphere: Arc<objects::Hitable> = if rand_mat < 0.0 {
 
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let three = random_index.ind_sample(&mut rng) *
-                                random_index.ind_sample(&mut rng);
+                        random_index.ind_sample(&mut rng);
                     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(one, two, three)));
                     let center1 = center + Vec3::new(0.0, 0.5, 0.0);
 

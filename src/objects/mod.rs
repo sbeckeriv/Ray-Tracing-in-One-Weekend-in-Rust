@@ -11,7 +11,7 @@ pub mod bvh;
 pub trait Hitable: Send + Sync{
     fn material(&self) -> Arc<Scatter>;
     fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord>;
-    fn bounding_box(&self, t0: f32, t1: f32) -> AABB;
+    fn bounding_box(&self, t0: f32, t1: f32) -> (Vec3<f32>, Vec3<f32>);
 }
 
 pub struct HitableList {
