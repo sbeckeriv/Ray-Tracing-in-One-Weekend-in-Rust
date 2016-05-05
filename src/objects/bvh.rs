@@ -3,10 +3,9 @@
 use na::Vec3;
 use ray::Ray;
 use utils::{ffmax, ffmin};
+use objects::{HitableList, Hitable};
 use std::sync::Arc;
-use nalgebra::Dot;
-use material::Scatter;
-use objects::{HitRecord, Hitable, HitableList};
+use std::cmp::Ordering;
 use material;
 enum HitDirection {
     Left,
@@ -19,7 +18,7 @@ struct Node {
     pub max: Vec3<f32>,
     pub left: Option<Box<Node>>,
     pub right: Option<Box<Node>>,
-    pub hitlist: HitableList,
+    pub hitlist: Option<HitableList>,
 }
 
 impl Node {
@@ -64,6 +63,19 @@ impl Node {
     }
 }
 impl Node {
+    pub fn new(list: Vec<Arc<Hitable>>)-> Node{
+        let head = Node {
+            min: Vec3::new(-50.0, -50.0, -50.0),
+            max: Vec3::new(1_000_000.0,  1_000_000.0, 1_000_000.0),
+            left: None,
+            right: None,
+            hitlist: None,
+        };
+
+        let mid = (head.min+head.max)/2.0;
+        let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) = list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, mid) );
+        head
+    }
     pub fn add(&mut self, values: HitableList) {
         //   let target_node = if *value < self.aabb_box {
         //       &mut self.left

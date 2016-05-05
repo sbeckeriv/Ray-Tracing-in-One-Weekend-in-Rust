@@ -2,7 +2,6 @@ extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;
 use ray::Ray;
-use utils::{ffmax, ffmin};
 use std::sync::Arc;
 use nalgebra::Dot;
 use material::Scatter;
@@ -38,7 +37,11 @@ impl MovingSphere {
         (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
     }
 }
-
+//impl Ord for MovingSphere{
+//    fn cmp(&self, other: &Self) -> Ordering{
+//        self.bounding_box.0 < other.bounding_box.0
+//    }
+//}
 impl Hitable for MovingSphere {
     fn material(&self) -> Arc<Scatter> {
         self.material.clone()
