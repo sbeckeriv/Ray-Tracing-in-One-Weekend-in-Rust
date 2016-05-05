@@ -7,13 +7,13 @@ use objects::{HitableList, Hitable};
 use std::sync::Arc;
 use std::cmp::Ordering;
 use material;
-enum HitDirection {
+pub enum HitDirection {
     Left,
     Right,
     Miss,
     End,
 }
-struct Node {
+pub struct Node {
     pub min: Vec3<f32>,
     pub max: Vec3<f32>,
     pub left: Option<Box<Node>>,
@@ -95,6 +95,7 @@ impl Node {
         }
         head
     }
-    pub fn find_hit(&mut self, ray: &Ray, t_min: f32, t_max: f32) {
+    pub fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList{
+        HitableList::new()
     }
 }

@@ -13,12 +13,12 @@ use utils::unit_vector;
 mod ray;
 use ray::Ray;
 mod objects;
-use objects::{HitableList, sphere};
+use objects::{Hitable,  HitableList, sphere};
+use objects::bvh::{Node};
 use objects::sphere::{MovingSphere, Sphere};
 mod camera;
 use camera::Camera;
 mod material;
-mod aabb;
 use std::fs;
 
 fn main() {
@@ -70,8 +70,10 @@ fn main() {
     }
 }
 
-fn color(ray: &Ray, world: &HitableList, depth: usize) -> Vec3<f32> {
-    match world.hit(ray, &0.001, &std::f32::MAX) {
+fn color(ray: &Ray, world: &Node, depth: usize) -> Vec3<f32> {
+    let hit_list = world.find_hit(ray, 0.001, std::f32::MAX);
+
+    match hit_list.hit(ray, &0.001, &std::f32::MAX) {
         Some((t, material)) => {
             if depth < 50 {
                 match material.scatter(ray, &t) {
@@ -175,11 +177,11 @@ fn three_world() -> HitableList {
     world
 }
 
-fn random_world() -> HitableList {
+fn random_world() -> Node {
     let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
     let random_size_index = Range::new(0.03, 0.55);
-    let mut world = HitableList::new();
+    let mut world = Vec::<Arc<Hitable>>::new();
     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(1.0, 1.0, 1.0)));
 
     let metal_base = Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.5));
@@ -249,5 +251,5 @@ fn random_world() -> HitableList {
         let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
         world.push(sphere.clone());
     }
-    world
+    Node::new(world, None, None)
 }
