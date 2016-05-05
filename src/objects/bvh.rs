@@ -68,9 +68,11 @@ impl Node {
                max: Option<Vec3<f32>>,
                depth: Option<i32>)
                -> Node {
+
         let real_depth = depth.unwrap_or(1);
-        let real_min = min.unwrap_or(Vec3::new(-50.0, -50.0, -50.0));
-        let real_max = max.unwrap_or(Vec3::new(1_000_000.0, 1_000_000.0, 1_000_000.0));
+        let real_min = min.unwrap_or(Vec3::new(0.0, 0.0, 0.0));
+        let real_max = max.unwrap_or(Vec3::new(50.0, 50.0, 50.0));
+
         let mut head = Node {
             min: real_min,
             max: real_max,
@@ -78,11 +80,27 @@ impl Node {
             right: None,
             hitlist: None,
         };
+
+        println!("new node depth {:?} list {:?} :: {:?}", real_depth, list.len(), (head.min, head.max));
         if list.len() > 4 && real_depth < 30 {
             println!("new split depth {:?}", real_depth);
             let mid = (head.min + head.max) / 2.0;
-            let min_mid = Vec3::new(mid.x, head.max.y, head.max.z);
-            let max_mid = Vec3::new(mid.x, head.min.y, head.min.z);
+            let mut min_mid = Vec3::new(head.max.x, head.max.y, head.max.z);
+            let mut max_mid = Vec3::new(head.min.x, head.min.y, head.min.z);
+            match real_depth %3{
+                0 => {
+                    min_mid.x = mid.x;
+                    max_mid.x = mid.x;
+                }
+                1 => {
+                    min_mid.y = mid.y;
+                    max_mid.y = mid.y;
+                }
+                _ => {
+                    min_mid.z = mid.z;
+                    max_mid.z = mid.z;
+                }
+            }
             let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, min_mid));
             // right left logic.
