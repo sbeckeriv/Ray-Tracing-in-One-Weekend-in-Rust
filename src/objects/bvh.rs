@@ -95,23 +95,6 @@ impl Node {
         }
         head
     }
-    pub fn add(&mut self, values: HitableList) {
-        //   let target_node = if *value < self.aabb_box {
-        //       &mut self.left
-        //   } else {
-        //       &mut self.right
-        //   };
-        //   match target_node {
-        //       &mut Some(ref mut sub) => sub.new(value),
-        //       &mut None => {
-        //           let node = Node {
-        //               aabb_box: value,
-        //               left: None,
-        //               right: None,
-        //           };
-        //           let boxed = Some(Box::new(node));
-        //           *target_node = boxed;
-        //       }
-        //   }
+    pub fn find_hit(&mut self, ray: &Ray, t_min: f32, t_max: f32) {
     }
 }
