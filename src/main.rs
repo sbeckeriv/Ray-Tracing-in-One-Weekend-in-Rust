@@ -22,7 +22,7 @@ mod material;
 use std::fs;
 
 fn main() {
-    let scene = 19;
+    let scene = 20;
     let image_x = 200;
     let image_y = 100;
     let frame_count = 1;
@@ -251,5 +251,5 @@ fn random_world() -> Node {
         let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
         world.push(sphere.clone());
     }
-    Node::new(world, None, None)
+    Node::new(world, None, None, None)
 }

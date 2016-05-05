@@ -63,7 +63,8 @@ impl Node {
     }
 }
 impl Node {
-    pub fn new(list: Vec<Arc<Hitable>>, min: Option<Vec3<f32>>, max: Option<Vec3<f32>>) -> Node {
+    pub fn new(list: Vec<Arc<Hitable>>, min: Option<Vec3<f32>>, max: Option<Vec3<f32>>, depth: Option<i32>) -> Node {
+        let real_depth = depth.unwrap_or(1);
         let real_min = min.unwrap_or(Vec3::new(-50.0, -50.0, -50.0));
         let real_max = max.unwrap_or(Vec3::new(1_000_000.0, 1_000_000.0, 1_000_000.0));
         let mut head = Node {
@@ -73,14 +74,20 @@ impl Node {
             right: None,
             hitlist: None,
         };
-        if list.len() > 4 {
+        if list.len() > 4 && real_depth<30 {
+            println!("new split depth {:?}", real_depth);
             let mid = (head.min + head.max) / 2.0;
             let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, mid));
             // right left logic.
+            println!("min:: {:?} len:: {:?}", head.min, even.len());
+            println!("max:: {:?} len:: {:?}", head.max, odd.len());
+            println!("mid:: {:?} ", mid);
 
-            let left = Node::new(odd, Some(head.min.clone()), Some(mid.clone()));
-            let right = Node::new(even, Some(mid.clone()), Some(head.max.clone()));
+            println!("new split left depth {:?}", real_depth);
+            let left = Node::new(odd, Some(head.min.clone()), Some(mid.clone()), Some(real_depth+1));
+            println!("new split right depth {:?}", real_depth);
+            let right = Node::new(even, Some(mid.clone()), Some(head.max.clone()), Some(real_depth+1));
             let left_boxed = Some(Box::new(left));
             head.left = left_boxed;
 
