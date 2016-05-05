@@ -71,7 +71,7 @@ impl Node {
 
         let real_depth = depth.unwrap_or(1);
         let real_min = min.unwrap_or(Vec3::new(0.0, 0.0, 0.0));
-        let real_max = max.unwrap_or(Vec3::new(50.0, 50.0, 50.0));
+        let real_max = max.unwrap_or(Vec3::new(1.0, 1.0, 1.0));
 
         let mut head = Node {
             min: real_min,
@@ -81,18 +81,21 @@ impl Node {
             hitlist: None,
         };
 
-        println!("new node depth {:?} list {:?} :: {:?}", real_depth, list.len(), (head.min, head.max));
-        if list.len() > 4 && real_depth < 30 {
+        println!("new node depth {:?} list {:?} :: {:?}",
+                 real_depth,
+                 list.len(),
+                 (head.min, head.max));
+        if list.len() > 10 && real_depth < 100 && head.min != head.max {
             println!("new split depth {:?}", real_depth);
             let mid = (head.min + head.max) / 2.0;
             let mut min_mid = Vec3::new(head.max.x, head.max.y, head.max.z);
             let mut max_mid = Vec3::new(head.min.x, head.min.y, head.min.z);
-            match real_depth %3{
-                0 => {
+            match real_depth % 3 {
+                1 => {
                     min_mid.x = mid.x;
                     max_mid.x = mid.x;
                 }
-                1 => {
+                0 => {
                     min_mid.y = mid.y;
                     max_mid.y = mid.y;
                 }
@@ -104,23 +107,32 @@ impl Node {
             let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, min_mid));
             // right left logic.
-            println!("min:: {:?} mid::{:?} len:: {:?}", head.min, min_mid, even.len());
-            println!("max:: {:?} mid::{:?} len:: {:?}", head.max, max_mid, odd.len());
+            println!("min:: {:?} mid::{:?} len:: {:?}",
+                     head.min,
+                     min_mid,
+                     even.len());
+            println!("max:: {:?} mid::{:?} len:: {:?}",
+                     head.max,
+                     max_mid,
+                     odd.len());
             println!("mid:: {:?} ", mid);
+            if odd.len() > 0 {
+                let left = Node::new(odd,
+                                     Some(head.min.clone()),
+                                     Some(min_mid.clone()),
+                                     Some(real_depth + 1));
+                let left_boxed = Some(Box::new(left));
+                head.left = left_boxed;
+            }
+            if even.len() > 0 {
+                let right = Node::new(even,
+                                      Some(max_mid.clone()),
+                                      Some(head.max.clone()),
+                                      Some(real_depth + 1));
+                let right_boxed = Some(Box::new(right));
+                head.right = right_boxed;
+            }
 
-            let left = Node::new(odd,
-                                 Some(head.min.clone()),
-                                 Some(min_mid.clone()),
-                                 Some(real_depth + 1));
-            let right = Node::new(even,
-                                  Some(max_mid.clone()),
-                                  Some(head.max.clone()),
-                                  Some(real_depth + 1));
-            let left_boxed = Some(Box::new(left));
-            head.left = left_boxed;
-
-            let right_boxed = Some(Box::new(right));
-            head.right = right_boxed;
         } else {
             let mut hitlist = HitableList::new();
             for record in list.clone() {
