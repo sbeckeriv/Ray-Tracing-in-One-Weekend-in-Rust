@@ -79,6 +79,13 @@ impl Node {
                 list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, mid));
             // right left logic.
 
+            let left = Node::new(odd, Some(head.min.clone()), Some(mid.clone()));
+            let right = Node::new(even, Some(mid.clone()), Some(head.max.clone()));
+            let left_boxed = Some(Box::new(left));
+            head.left = left_boxed;
+
+            let right_boxed = Some(Box::new(right));
+            head.right = right_boxed;
         } else {
             let mut hitlist = HitableList::new();
             for record in list.clone() {
