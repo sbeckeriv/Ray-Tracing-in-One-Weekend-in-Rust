@@ -63,17 +63,29 @@ impl Node {
     }
 }
 impl Node {
-    pub fn new(list: Vec<Arc<Hitable>>)-> Node{
-        let head = Node {
-            min: Vec3::new(-50.0, -50.0, -50.0),
-            max: Vec3::new(1_000_000.0,  1_000_000.0, 1_000_000.0),
+    pub fn new(list: Vec<Arc<Hitable>>, min: Option<Vec3<f32>>, max: Option<Vec3<f32>>) -> Node {
+        let real_min = min.unwrap_or(Vec3::new(-50.0, -50.0, -50.0));
+        let real_max = max.unwrap_or(Vec3::new(1_000_000.0, 1_000_000.0, 1_000_000.0));
+        let mut head = Node {
+            min: real_min,
+            max: real_max,
             left: None,
             right: None,
             hitlist: None,
         };
+        if list.len() > 4 {
+            let mid = (head.min + head.max) / 2.0;
+            let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
+                list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, mid));
+            // right left logic.
 
-        let mid = (head.min+head.max)/2.0;
-        let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) = list.into_iter().partition(|n| n.overlaps_bounding_box(head.min, mid) );
+        } else {
+            let mut hitlist = HitableList::new();
+            for record in list.clone() {
+                hitlist.push(record);
+            }
+            head.hitlist = Some(hitlist);//lazy clone. might need lifetimes later.
+        }
         head
     }
     pub fn add(&mut self, values: HitableList) {
