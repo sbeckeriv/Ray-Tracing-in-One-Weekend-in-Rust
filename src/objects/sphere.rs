@@ -37,11 +37,11 @@ impl MovingSphere {
         (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
     }
 }
-//impl Ord for MovingSphere{
+// impl Ord for MovingSphere{
 //    fn cmp(&self, other: &Self) -> Ordering{
 //        self.bounding_box.0 < other.bounding_box.0
 //    }
-//}
+// }
 impl Hitable for MovingSphere {
     fn material(&self) -> Arc<Scatter> {
         self.material.clone()
@@ -80,7 +80,7 @@ impl Hitable for MovingSphere {
     fn bounding_box(&self, t0: f32, t1: f32) -> (Vec3<f32>, Vec3<f32>) {
         let one = self.center0 - Vec3::new(self.radius, self.radius, self.radius);
         let two = self.center0 + Vec3::new(self.radius, self.radius, self.radius);
-       (one, two)
+        (one, two)
     }
 }
 
