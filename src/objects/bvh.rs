@@ -117,12 +117,14 @@ impl Node {
                     max_mid.z = mid.z;
                 }
             }
-            let (left, right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
+            let mut duplicates = Vec::<Arc<Hitable>>::new();
+            let (mut left, mut right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| {
                     match (n.overlaps_bounding_box(head.min, min_mid),
                            n.overlaps_bounding_box(max_mid, head.max)) {
                         (true, true) => {
-                          false
+                            duplicates.push(n.clone());
+                            true
                         }
                         (true, false) => true,
                         (false, true) => false,
@@ -145,7 +147,8 @@ impl Node {
                 head.left = left_boxed;
             }
             if right.len() > 0 {
-                let right = Node::new(right,
+                duplicates.append(&mut right);
+                let right = Node::new(duplicates,
                                       Some(max_mid.clone()),
                                       Some(head.max.clone()),
                                       Some(real_depth + 1));
