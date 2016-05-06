@@ -252,7 +252,7 @@ fn random_world() -> Node {
         world.push(sphere.clone());
     }
     let n = Node::new(world, None, None, None);
-    n.print("".to_string(), None);
+    n.print("  ".to_string(), None);
     n
 
 }

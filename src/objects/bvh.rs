@@ -67,16 +67,16 @@ impl Node {
 impl Node {
     // http://stackoverflow.com/questions/4965335/how-to-print-binary-tree-diagram
     pub fn print(&self, prefix: String, is_tail: Option<()>) {
-        let tail = is_tail.as_ref().map_or("├── ", |c| "└── ");
+        let tail = is_tail.as_ref().map_or("  ├── ", |c| "  └── ");
         let hit_list = self.hitlist
                            .as_ref()
                            .map_or("".to_string(), |c| format!("{}", c.list.len()));
         println!("{}{} {:?} {}", prefix, tail, (self.min, self.max), hit_list);
-        let child_tail = format!("{}{}", prefix, is_tail.map_or("│   ", |c| "    "));
+        let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |c| "      "));
         if self.left.is_some() {
-            self.left.as_ref().map(|n| n.print(child_tail, None));
+            self.left.as_ref().map(|n| n.print(child_tail, self.right.as_ref().map_or(Some(()), |v| None)));
         }
-        let child_tail = format!("{}{}", prefix, is_tail.map_or("│   ", |c| "    "));
+        let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |c| "      "));
         if self.right.is_some() {
             self.right.as_ref().map(|n| n.print(child_tail, Some(())));
         }
@@ -99,14 +99,9 @@ impl Node {
             hitlist: None,
         };
 
-        println!("new node depth {:?} list {:?} :: {:?}",
-                 real_depth,
-                 list.len(),
-                 (head.min, head.max));
         if list.len() > 10 && real_depth < 10 && head.min != head.max {
             let random_index = Range::new(0.0, 1.0);
             let mut rng = rand::thread_rng();
-            println!("new split depth {:?}", real_depth);
             let mid = (head.min + head.max) / 2.0;
             let mut min_mid = Vec3::new(head.max.x, head.max.y, head.max.z);
             let mut max_mid = Vec3::new(head.min.x, head.min.y, head.min.z);
@@ -124,7 +119,7 @@ impl Node {
                     max_mid.z = mid.z;
                 }
             }
-            let (even, odd): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
+            let ( left, right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| {
                     match (n.overlaps_bounding_box(head.min, min_mid),
                            n.overlaps_bounding_box(max_mid, head.max)) {
@@ -139,31 +134,21 @@ impl Node {
                         }
                         (true, false) => true,
                         (false, true) => false,
-                        _ => false,
+                        _ => unreachable!("Object not in either left or right. This is a problem"),
                     }
 
                 });
-            // right left logic.
-            println!("min:: {:?} mid::{:?} len:: {:?}",
-                     head.min,
-                     min_mid,
-                     even.len());
-            println!("max:: {:?} mid::{:?} len:: {:?}",
-                     head.max,
-                     max_mid,
-                     odd.len());
-            println!("mid:: {:?} ", mid);
             // dont run the tree if we have nothing to hit..clearly
-            if odd.len() > 0 {
-                let left = Node::new(odd,
+            if left.len() > 0 {
+                let left = Node::new(left,
                                      Some(head.min.clone()),
                                      Some(min_mid.clone()),
                                      Some(real_depth + 1));
                 let left_boxed = Some(Box::new(left));
                 head.left = left_boxed;
             }
-            if even.len() > 0 {
-                let right = Node::new(even,
+            if right.len() > 0 {
+                let right = Node::new(right,
                                       Some(max_mid.clone()),
                                       Some(head.max.clone()),
                                       Some(real_depth + 1));
