@@ -49,7 +49,9 @@ impl Node {
                 (left, HitDirection::Miss) => HitDirection::Left,
                 (HitDirection::Miss, right) => HitDirection::Right,
                 _ => {
-                    match ray.closer(t_max, self.left.as_ref().unwrap().bounding_box(t_min,t_max), self.right.as_ref().unwrap().bounding_box(t_min, t_max)) {
+                    match ray.closer(t_max,
+                                     self.left.as_ref().unwrap().bounding_box(t_min, t_max),
+                                     self.right.as_ref().unwrap().bounding_box(t_min, t_max)) {
                         HitableDirection::Left => HitDirection::Left,
                         HitableDirection::Right => HitDirection::Right,
                         _ => unreachable!("N is not closer to either?"),
