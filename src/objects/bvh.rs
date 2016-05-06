@@ -103,7 +103,7 @@ impl Node {
                  real_depth,
                  list.len(),
                  (head.min, head.max));
-        if list.len() > 10 && real_depth < 30 && head.min != head.max {
+        if list.len() > 10 && real_depth < 10 && head.min != head.max {
             let random_index = Range::new(0.0, 1.0);
             let mut rng = rand::thread_rng();
             println!("new split depth {:?}", real_depth);
@@ -131,7 +131,7 @@ impl Node {
                         (true, true) => {
                             let rand = random_index.ind_sample(&mut rng);
 
-                            if rand > 0.5 {
+                            if rand > 0.4 {
                                 false
                             } else {
                                 true
