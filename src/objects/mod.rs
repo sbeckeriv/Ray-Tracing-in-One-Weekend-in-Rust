@@ -1,11 +1,18 @@
 extern crate nalgebra;
 extern crate nalgebra as na;
 use na::Vec3;
+use na::Absolute;
 use ray::Ray;
 use std::sync::Arc;
 use material::Scatter;
 pub mod sphere;
 pub mod bvh;
+
+pub enum HitableDirection{
+    Left,
+    Right,
+    Miss,
+}
 pub trait Hitable: Send + Sync{
     fn material(&self) -> Arc<Scatter>;
     fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord>;
@@ -30,6 +37,14 @@ pub trait Hitable: Send + Sync{
         //                     local.0.z <= max.z && local.1.z >= min.z);
         // println!("{:?} :: {:?} :: {:?}", results, local, (min, max));
         results
+    }
+    fn closer(&self, left: (Vec3<f32>, Vec3<f32>), right: (Vec3<f32>, Vec3<f32>)) -> HitableDirection{
+        let local = self.bounding_box(0.0, 0.0);
+        if Absolute::abs(&(local.0 - left.0)).len() - Absolute::abs(&(right.1 - local.1)).len() <= 0 {
+            HitableDirection::Left
+        }else{
+            HitableDirection::Right
+        }
     }
 }
 pub struct HitableList {

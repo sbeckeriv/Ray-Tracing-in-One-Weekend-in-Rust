@@ -3,7 +3,7 @@
 use na::Vec3;
 use ray::Ray;
 use utils::{ffmax, ffmin};
-use objects::{HitableList, Hitable};
+use objects::{HitableList, Hitable, HitableDirection};
 use std::sync::Arc;
 use std::cmp::Ordering;
 use material;
@@ -99,32 +99,20 @@ impl Node {
             hitlist: None,
         };
 
-        if list.len() > 5 && real_depth < 32 && head.min != head.max {
+        if list.len() > 5 && real_depth < 20 && head.min != head.max {
             let mid = (head.min + head.max) / 2.0;
-            let mut min_mid = Vec3::new(head.max.x, head.max.y, head.max.z);
-            let mut max_mid = Vec3::new(head.min.x, head.min.y, head.min.z);
-            match real_depth % 3 {
-                1 => {
-                    min_mid.x = mid.x;
-                    max_mid.x = mid.x;
-                }
-                0 => {
-                    min_mid.y = mid.y;
-                    max_mid.y = mid.y;
-                }
-                _ => {
-                    min_mid.z = mid.z;
-                    max_mid.z = mid.z;
-                }
-            }
-            let mut duplicates = Vec::<Arc<Hitable>>::new();
-            let (mut left, mut right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
+            let (mut min_mid, mut max_mid) = Self::min_values(&head, &mid, real_depth);
+
+            let (left, right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| {
                     match (n.overlaps_bounding_box(head.min, min_mid),
                            n.overlaps_bounding_box(max_mid, head.max)) {
                         (true, true) => {
-                            duplicates.push(n.clone());
-                            true
+                            match n.closer((head.min, min_mid), (max_mid, head.max)){
+                                HitableDirection::Left => true,
+                                HitableDirection::Right => false,
+                                _ => unreachable!("N is not closer to either?")
+                            }
                         }
                         (true, false) => true,
                         (false, true) => false,
@@ -147,8 +135,7 @@ impl Node {
                 head.left = left_boxed;
             }
             if right.len() > 0 {
-                duplicates.append(&mut right);
-                let right = Node::new(duplicates,
+                let right = Node::new(right,
                                       Some(max_mid.clone()),
                                       Some(head.max.clone()),
                                       Some(real_depth + 1));
@@ -167,5 +154,24 @@ impl Node {
     }
     pub fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList {
         HitableList::new()
+    }
+    pub fn min_values(node: &Node, mid: &Vec3<f32>, depth: i32) -> (Vec3<f32>, Vec3<f32>){
+            let mut min_mid = Vec3::new(node.max.x, node.max.y, node.max.z);
+            let mut max_mid = Vec3::new(node.min.x, node.min.y, node.min.z);
+            match depth % 3 {
+                1 => {
+                    min_mid.x = mid.x;
+                    max_mid.x = mid.x;
+                }
+                0 => {
+                    min_mid.y = mid.y;
+                    max_mid.y = mid.y;
+                }
+                _ => {
+                    min_mid.z = mid.z;
+                    max_mid.z = mid.z;
+                }
+            }
+            (min_mid, max_mid)
     }
 }
