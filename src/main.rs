@@ -251,5 +251,8 @@ fn random_world() -> Node {
         let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
         world.push(sphere.clone());
     }
-    Node::new(world, None, None, None)
+    let n = Node::new(world, None, None, None);
+    n.print("".to_string(), None);
+    n
+
 }
