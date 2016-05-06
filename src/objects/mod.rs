@@ -12,6 +12,13 @@ pub trait Hitable: Send + Sync{
     fn bounding_box(&self, t0: f32, t1: f32) -> (Vec3<f32>, Vec3<f32>);
     fn overlaps_bounding_box(&self, min: Vec3<f32>, max: Vec3<f32>) -> bool {
         let local = self.bounding_box(0.0, 0.0);
+        if local.1.x <= local.0.x || local.1.y <= local.0.y || local.1.z <= local.0.z {
+            unreachable!("local is broken")
+        }
+
+        if max.x <= min.x || max.y <= min.y || max.z <= min.z {
+            unreachable!("min max is broken")
+        }
         let results = local.0.x <= max.x && min.x <= local.1.x ||
                       local.0.y <= max.y && min.y <= local.1.y ||
                       local.0.z <= max.z && min.z <= local.1.z;

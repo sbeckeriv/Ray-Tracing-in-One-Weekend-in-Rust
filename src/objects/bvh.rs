@@ -74,7 +74,9 @@ impl Node {
         println!("{}{} {:?} {}", prefix, tail, (self.min, self.max), hit_list);
         let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |c| "      "));
         if self.left.is_some() {
-            self.left.as_ref().map(|n| n.print(child_tail, self.right.as_ref().map_or(Some(()), |v| None)));
+            self.left
+                .as_ref()
+                .map(|n| n.print(child_tail, self.right.as_ref().map_or(Some(()), |v| None)));
         }
         let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |c| "      "));
         if self.right.is_some() {
@@ -119,7 +121,7 @@ impl Node {
                     max_mid.z = mid.z;
                 }
             }
-            let ( left, right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
+            let (left, right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| {
                     match (n.overlaps_bounding_box(head.min, min_mid),
                            n.overlaps_bounding_box(max_mid, head.max)) {
@@ -134,7 +136,9 @@ impl Node {
                         }
                         (true, false) => true,
                         (false, true) => false,
-                        _ => unreachable!("Object not in either left or right. This is a problem"),
+                        (false, false) => {
+                            unreachable!("Object not in either left or right. This is a problem")
+                        }
                     }
 
                 });
