@@ -90,8 +90,8 @@ impl Node {
                -> Node {
 
         let real_depth = depth.unwrap_or(1);
-        let real_min = min.unwrap_or(Vec3::new(0.0, 0.0, 0.0));
-        let real_max = max.unwrap_or(Vec3::new(1.0, 1.0, 1.0));
+        let real_min = min.unwrap_or(Vec3::new(-10.0, -10.0, -10.0));
+        let real_max = max.unwrap_or(Vec3::new(10.0, 10.0, 10.0));
 
         let mut head = Node {
             min: real_min,
@@ -101,7 +101,7 @@ impl Node {
             hitlist: None,
         };
 
-        if list.len() > 5 && real_depth < 10 && head.min != head.max {
+        if list.len() > 5 && real_depth < 32 && head.min != head.max {
             let random_index = Range::new(0.0, 1.0);
             let mut rng = rand::thread_rng();
             let mid = (head.min + head.max) / 2.0;
@@ -137,7 +137,10 @@ impl Node {
                         (true, false) => true,
                         (false, true) => false,
                         (false, false) => {
-                            unreachable!("Object not in either left or right. This is a problem")
+                            unreachable!(format!("Object not in either left or right. This is a \
+                                                  problem. Depth::{} n::{:?}",
+                                                 real_depth,
+                                                 n.bounding_box(0.0, 0.0)))
                         }
                     }
 

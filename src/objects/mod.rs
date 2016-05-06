@@ -19,9 +19,9 @@ pub trait Hitable: Send + Sync{
         if max.x <= min.x || max.y <= min.y || max.z <= min.z {
             unreachable!("min max is broken")
         }
-        let results = local.0.x <= max.x && min.x <= local.1.x ||
-                      local.0.y <= max.y && min.y <= local.1.y ||
-                      local.0.z <= max.z && min.z <= local.1.z;
+        let results = local.0.x <= max.x && min.x <= local.1.x && local.0.y <= max.y &&
+                      min.y <= local.1.y && local.0.z <= max.z &&
+                      min.z <= local.1.z;
         //      let results = (local.0.x <= min.x && local.1.x >= min.x ||
         //                     local.0.x <= max.x && local.1.x >= min.x) &&
         //                    (local.0.y <= min.y && local.1.y >= min.y ||
