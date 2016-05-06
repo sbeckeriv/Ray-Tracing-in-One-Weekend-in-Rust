@@ -6,8 +6,6 @@ use utils::{ffmax, ffmin};
 use objects::{HitableList, Hitable};
 use std::sync::Arc;
 use std::cmp::Ordering;
-extern crate rand;
-use rand::distributions::{IndependentSample, Range};
 use material;
 pub enum HitDirection {
     Left,
@@ -102,8 +100,6 @@ impl Node {
         };
 
         if list.len() > 5 && real_depth < 32 && head.min != head.max {
-            let random_index = Range::new(0.0, 1.0);
-            let mut rng = rand::thread_rng();
             let mid = (head.min + head.max) / 2.0;
             let mut min_mid = Vec3::new(head.max.x, head.max.y, head.max.z);
             let mut max_mid = Vec3::new(head.min.x, head.min.y, head.min.z);
@@ -126,13 +122,7 @@ impl Node {
                     match (n.overlaps_bounding_box(head.min, min_mid),
                            n.overlaps_bounding_box(max_mid, head.max)) {
                         (true, true) => {
-                            let rand = random_index.ind_sample(&mut rng);
-
-                            if rand > 0.4 {
-                                false
-                            } else {
-                                true
-                            }
+                          false
                         }
                         (true, false) => true,
                         (false, true) => false,
