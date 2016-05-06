@@ -99,7 +99,7 @@ impl Node {
             hitlist: None,
         };
 
-        if list.len() > 10 && real_depth < 10 && head.min != head.max {
+        if list.len() > 5 && real_depth < 10 && head.min != head.max {
             let random_index = Range::new(0.0, 1.0);
             let mut rng = rand::thread_rng();
             let mid = (head.min + head.max) / 2.0;
