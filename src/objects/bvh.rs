@@ -62,8 +62,7 @@ impl Node {
             HitDirection::Miss
         }
     }
-}
-impl Node {
+
     // http://stackoverflow.com/questions/4965335/how-to-print-binary-tree-diagram
     pub fn print(&self, prefix: String, is_tail: Option<()>) {
         let tail = is_tail.as_ref().map_or("  ├── ", |c| "  └── ");
@@ -98,7 +97,7 @@ impl Node {
             max: real_max,
             left: None,
             right: None,
-            hitlist: None,
+            hitlist: Some(HitableList::new()),
         };
 
         if list.len() > 5 && real_depth < 20 && head.min != head.max {
@@ -155,7 +154,19 @@ impl Node {
         head
     }
     pub fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList {
-        HitableList::new()
+        match self.hits(ray, t_min, t_max) {
+            HitDirection::Left => self.left.as_ref().unwrap().find_hit(ray, t_min, t_max),
+            HitDirection::Right => self.right.as_ref().unwrap().find_hit(ray, t_min, t_max),
+            HitDirection::Miss => HitableList::new(),
+            HitDirection::End => {
+                println!("end");
+                let mut hit_list = HitableList::new();
+                for record in &self.hitlist.as_ref().unwrap().list {
+                    hit_list.push(record.clone());
+                }
+                hit_list
+            }
+        }
     }
     pub fn min_values(node: &Node, mid: &Vec3<f32>, depth: i32) -> (Vec3<f32>, Vec3<f32>) {
         let mut min_mid = Vec3::new(node.max.x, node.max.y, node.max.z);
