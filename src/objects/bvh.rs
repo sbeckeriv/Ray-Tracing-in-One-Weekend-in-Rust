@@ -49,11 +49,10 @@ impl Node {
                 (left, HitDirection::Miss) => HitDirection::Left,
                 (HitDirection::Miss, right) => HitDirection::Right,
                 _ => {
-                    if true {
-                        // self.left.unwrap().t < self.right.unwrap().t {
-                        HitDirection::Left
-                    } else {
-                        HitDirection::Right
+                    match ray.closer(t_max, self.left.as_ref().unwrap().bounding_box(t_min,t_max), self.right.as_ref().unwrap().bounding_box(t_min, t_max)) {
+                        HitableDirection::Left => HitDirection::Left,
+                        HitableDirection::Right => HitDirection::Right,
+                        _ => unreachable!("N is not closer to either?"),
                     }
                 }
             }
@@ -81,6 +80,7 @@ impl Node {
             self.right.as_ref().map(|n| n.print(child_tail, Some(())));
         }
     }
+
     pub fn new(list: Vec<Arc<Hitable>>,
                min: Option<Vec3<f32>>,
                max: Option<Vec3<f32>>,
@@ -108,10 +108,10 @@ impl Node {
                     match (n.overlaps_bounding_box(head.min, min_mid),
                            n.overlaps_bounding_box(max_mid, head.max)) {
                         (true, true) => {
-                            match n.closer((head.min, min_mid), (max_mid, head.max)){
+                            match n.closer((head.min, min_mid), (max_mid, head.max)) {
                                 HitableDirection::Left => true,
                                 HitableDirection::Right => false,
-                                _ => unreachable!("N is not closer to either?")
+                                _ => unreachable!("N is not closer to either?"),
                             }
                         }
                         (true, false) => true,
@@ -155,23 +155,23 @@ impl Node {
     pub fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList {
         HitableList::new()
     }
-    pub fn min_values(node: &Node, mid: &Vec3<f32>, depth: i32) -> (Vec3<f32>, Vec3<f32>){
-            let mut min_mid = Vec3::new(node.max.x, node.max.y, node.max.z);
-            let mut max_mid = Vec3::new(node.min.x, node.min.y, node.min.z);
-            match depth % 3 {
-                1 => {
-                    min_mid.x = mid.x;
-                    max_mid.x = mid.x;
-                }
-                0 => {
-                    min_mid.y = mid.y;
-                    max_mid.y = mid.y;
-                }
-                _ => {
-                    min_mid.z = mid.z;
-                    max_mid.z = mid.z;
-                }
+    pub fn min_values(node: &Node, mid: &Vec3<f32>, depth: i32) -> (Vec3<f32>, Vec3<f32>) {
+        let mut min_mid = Vec3::new(node.max.x, node.max.y, node.max.z);
+        let mut max_mid = Vec3::new(node.min.x, node.min.y, node.min.z);
+        match depth % 3 {
+            1 => {
+                min_mid.x = mid.x;
+                max_mid.x = mid.x;
             }
-            (min_mid, max_mid)
+            0 => {
+                min_mid.y = mid.y;
+                max_mid.y = mid.y;
+            }
+            _ => {
+                min_mid.z = mid.z;
+                max_mid.z = mid.z;
+            }
+        }
+        (min_mid, max_mid)
     }
 }
