@@ -3,7 +3,7 @@ extern crate nalgebra as na;
 use na::Vec3;
 use na::Absolute;
 use objects::HitableDirection;
-
+#[derive(Debug)]
 pub struct Ray {
     pub origin: Vec3<f32>,
     pub direction: Vec3<f32>,

@@ -71,8 +71,7 @@ fn main() {
 }
 
 fn color(ray: &Ray, world: &Node, depth: usize) -> Vec3<f32> {
-    let hit_list = world.find_hit(ray, 0.001, std::f32::MAX);
-
+    let hit_list = world.find_hit(ray, 0.01, std::f32::MAX);
     match hit_list.hit(ray, &0.001, &std::f32::MAX) {
         Some((t, material)) => {
             if depth < 50 {
@@ -254,5 +253,4 @@ fn random_world() -> Node {
     let n = Node::new(world, None, None, None);
     n.print("  ".to_string(), None);
     n
-
 }
