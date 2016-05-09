@@ -3,7 +3,7 @@
 use na::Vec3;
 use ray::Ray;
 use utils::{ffmax, ffmin};
-use objects::{aabb, HitableList, Hitable, HitableDirection};
+use objects::{aabb, HitableList, Hitable, HitableDirection, BVHFindHit};
 use std::sync::Arc;
 use std::cmp::Ordering;
 use material;
@@ -29,7 +29,36 @@ pub struct Node {
     pub hitlist: Option<HitableList>,
     pub hitable_count: usize,
 }
-
+impl BVHFindHit for Node {
+    fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList {
+        let results = self.hits(ray, t_min, t_max);
+        if ray.debug {
+            println!("{:?} {:?}", ray, results);
+        }
+        match results {
+            HitDirection::Left => self.left.as_ref().unwrap().find_hit(ray, t_min, t_max),
+            HitDirection::Right => self.right.as_ref().unwrap().find_hit(ray, t_min, t_max),
+            a @ HitDirection::Miss | a @ HitDirection::None => {
+                // println!("{:?}", a);
+                HitableList::new()
+            }
+            HitDirection::End => {
+                if ray.debug {
+                    println!("END {:?} {:?}",
+                             self.bounding_box(0.0, 0.0),
+                             self.hitlist.as_ref().unwrap().list.len());
+                }
+                let mut hit_list = HitableList::new();
+                if self.hitlist.is_some() {
+                    for record in &self.hitlist.as_ref().unwrap().list {
+                        hit_list.push(record.clone());
+                    }
+                }
+                hit_list
+            }
+        }
+    }
+}
 impl Node {
     fn bounding_box(&self, t0: f32, t1: f32) -> (Vec3<f32>, Vec3<f32>) {
         let one = self.min;
@@ -47,40 +76,54 @@ impl Node {
     }
 
     fn hits(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitDirection {
+        let result = self.in_bounding_box(ray, t_min, t_max);
         // does the ray at this time hit?
-        match self.in_bounding_box(ray, t_min, t_max) {
+        if ray.debug {
+            println!("node {:?}", result);
+        }
+        match result {
             Hits::Hit => {
                 if self.left.is_none() && self.right.is_none() {
                     HitDirection::End
                 } else {
-                    let hit = match (self.left
-                                         .as_ref()
-                                         .map_or(Hits::None,
-                                                 |n| n.in_bounding_box(ray, t_min, t_max)),
-                                     self.right
-                                         .as_ref()
-                                         .map_or(Hits::None,
-                                                 |n| n.in_bounding_box(ray, t_min, t_max))) {
+
+                    let hl = self.left
+                                 .as_ref()
+                                 .map_or(Hits::None, |n| n.in_bounding_box(ray, t_min, t_max));
+
+                    if ray.debug {
+                        println!("left: {:?}", hl);
+                    }
+                    let hr = self.right
+                                 .as_ref()
+                                 .map_or(Hits::None, |n| n.in_bounding_box(ray, t_min, t_max));
+                    if ray.debug {
+                        println!("right: {:?}", hr);
+                    }
+                    // println!("{:?}", h);
+                    let hit = match (hl, hr) {
                         (Hits::Miss, Hits::Miss) => HitDirection::Miss,
+                        (Hits::None, Hits::Miss) => HitDirection::Miss,
+                        (Hits::Miss, Hits::None) => HitDirection::Miss,
                         (Hits::None, Hits::None) => {
                             unreachable!("Both left and right can not be none here")
                         }
-                        (left, Hits::Miss) | (left, Hits::None) => HitDirection::Left,
-                        (Hits::None, right) | (Hits::Miss, right) => HitDirection::Right,
-                        _ => {
+                        (Hits::Hit, Hits::Miss) | (Hits::Hit, Hits::None) => HitDirection::Left,
+                        (Hits::None, Hits::Hit) | (Hits::Miss, Hits::Hit) => HitDirection::Right,
+                        (Hits::Hit, Hits::Hit) => {
                             // both must hit
                             match ray.closer(t_min,
-                                            self.left
-                                                .as_ref()
-                                                .unwrap()
-                                                .bounding_box(t_min, t_max),
-                                            self.right
-                                                .as_ref()
-                                                .unwrap()
-                                                .bounding_box(t_min, t_max)) {
-                               HitableDirection::Left => HitDirection::Left,
-                               HitableDirection::Right => HitDirection::Right,
-                               _ => unreachable!("N is not closer to either?"),
+                                             self.left
+                                                 .as_ref()
+                                                 .unwrap()
+                                                 .bounding_box(t_min, t_max),
+                                             self.right
+                                                 .as_ref()
+                                                 .unwrap()
+                                                 .bounding_box(t_min, t_max)) {
+                                HitableDirection::Left => HitDirection::Left,
+                                HitableDirection::Right => HitDirection::Right,
+                                _ => unreachable!("N is not closer to either?"),
                             }
                         }
                     };
@@ -135,7 +178,7 @@ impl Node {
             hitable_count: list.len(),
         };
 
-        if list.len() > 5 && real_depth < 20 && head.min != head.max {
+        if list.len() > 700 && real_depth < 20 && head.min != head.max {
             let mid = (head.min + head.max) / 2.0;
             let (mut min_mid, mut max_mid) = Self::min_values(&head, &mid, real_depth);
 
@@ -188,40 +231,7 @@ impl Node {
         }
         head
     }
-    pub fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList {
-        match self.hits(ray, t_min, t_max) {
-            HitDirection::Left => {
-                // println!("left");
-                match self.left.as_ref(){
-                    Some(node) => node.find_hit(ray, t_min, t_max),
-                    None => HitableList::new()
-                }
-            }
-            HitDirection::Right => {
-                // println!("right");
-                match self.right.as_ref(){
-                    Some(node) => node.find_hit(ray, t_min, t_max),
-                    None => HitableList::new()
-                }
-            }
-            a @ HitDirection::Miss | a @ HitDirection::None => {
-                // println!("{:?}", a);
-                HitableList::new()
-            }
-            HitDirection::End => {
-               // println!("END {:?} {}",
-               //          self.bounding_box(0.0, 0.0),
-               //          self.hitlist.as_ref().unwrap().list.len());
-                let mut hit_list = HitableList::new();
-                if self.hitlist.is_some() {
-                    for record in &self.hitlist.as_ref().unwrap().list {
-                        hit_list.push(record.clone());
-                    }
-                }
-                hit_list
-            }
-        }
-    }
+
     pub fn min_values(node: &Node, mid: &Vec3<f32>, depth: i32) -> (Vec3<f32>, Vec3<f32>) {
         let mut min_mid = Vec3::new(node.max.x, node.max.y, node.max.z);
         let mut max_mid = Vec3::new(node.min.x, node.min.y, node.min.z);

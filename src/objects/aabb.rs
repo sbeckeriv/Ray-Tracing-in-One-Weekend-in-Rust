@@ -17,6 +17,9 @@ impl AABB {
                            (max[a] - ray.origin[a]) / ray.direction[a]);
             let min_min = ffmax(t0, tmin);
             let max_max = ffmin(t1, tmax);
+            if ray.debug {
+                println!("aabb::{} {:?}", a, (min_min, max_max));
+            }
             if max_max <= min_min {
                 return false;
             }

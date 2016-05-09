@@ -13,8 +13,8 @@ use utils::unit_vector;
 mod ray;
 use ray::Ray;
 mod objects;
-use objects::{Hitable,  HitableList, sphere};
-use objects::bvh::{Node};
+use objects::{Hitable, BVHFindHit, HitableList, sphere};
+use objects::bvh::Node;
 use objects::sphere::{MovingSphere, Sphere};
 mod camera;
 use camera::Camera;
@@ -28,7 +28,7 @@ fn main() {
     let frame_count = 1;
     let frame_count_string = format!("{}", frame_count);
     let ns = 200;
-    let world = random_world();
+    let (world, _) = three_world();
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
@@ -48,7 +48,10 @@ fn main() {
                 let rand_y = random_index.ind_sample(&mut rng);
                 let u = (x as f32 + rand_x) / image_x as f32;
                 let v = ((image_y - 1 - y) as f32 + rand_y) / image_y as f32;
-                let ray = camera.get_ray(&u, &v);
+                let mut ray = camera.get_ray(&u, &v);
+                if x == 100 && y == 50 {
+                    ray.debug = true;
+                }
                 col = col + color(&ray, &world, 0);
             }
             let base = 255.99;
@@ -70,8 +73,8 @@ fn main() {
     }
 }
 
-fn color(ray: &Ray, world: &Node, depth: usize) -> Vec3<f32> {
-    let hit_list = world.find_hit(ray, 0.01, std::f32::MAX);
+fn color(ray: &Ray, world: &Arc<BVHFindHit>, depth: usize) -> Vec3<f32> {
+    let hit_list: HitableList = world.find_hit(ray, 0.001, std::f32::MAX);
     match hit_list.hit(ray, &0.001, &std::f32::MAX) {
         Some((t, material)) => {
             if depth < 50 {
@@ -94,7 +97,7 @@ fn color(ray: &Ray, world: &Node, depth: usize) -> Vec3<f32> {
 }
 fn book_cam(image_x: &u32, image_y: &u32, offset: f32) -> Camera {
     let look_from = Vec3::new(13.0, 3.0, -3.0);
-    let look_at = Vec3::new(0.0,-4.0, 0.0);
+    let look_at = Vec3::new(0.0, -4.0, 0.0);
     let distance = 10.0;
     let aperture = 0.0;
     Camera::new_focus(look_from,
@@ -155,8 +158,8 @@ fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset
 
 }
 
-fn three_world() -> HitableList {
-    let mut world = HitableList::new();
+fn three_world() -> (Arc<BVHFindHit>, Arc<BVHFindHit>) {
+    let mut world = Vec::<Arc<Hitable>>::new();
     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
     let sphere = Arc::new(Sphere::new(Vec3::new(0.0, (0.0 - 100.5), 0.0), 100.0, base_mat.clone()));
     world.push(sphere.clone());
@@ -173,10 +176,16 @@ fn three_world() -> HitableList {
     let die1 = Arc::new(material::Dielectric::new(1.5));
     let sphere = Arc::new(Sphere::new(Vec3::new(0.0 - 1.0, 0.0, 0.0 - 1.0), 0.5, die1.clone()));
     world.push(sphere.clone());
-    world
+    let mut hitlist = HitableList::new();
+    for record in &world {
+        hitlist.push(record.clone());
+    }
+    let n = Node::new(world, None, None, None);
+    n.print("  ".to_string(), None);
+    (Arc::new(n), Arc::new(hitlist))
 }
 
-fn random_world() -> Node {
+fn random_world() -> (Arc<BVHFindHit>, Arc<BVHFindHit>) {
     let mut rng = rand::thread_rng();
     let random_index = Range::new(0.0, 1.0);
     let random_size_index = Range::new(0.03, 0.55);
@@ -185,7 +194,7 @@ fn random_world() -> Node {
 
     let metal_base = Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.5));
     let sphere = Arc::new(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0),
-                                      1000.0,
+                                      1000.1,
                                       base_mat.clone()));
     world.push(sphere.clone());
     let minus_vec = Vec3::new(4.0, 0.2, 0.0);
@@ -202,7 +211,7 @@ fn random_world() -> Node {
                     let one = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let two = random_index.ind_sample(&mut rng) * random_index.ind_sample(&mut rng);
                     let three = random_index.ind_sample(&mut rng) *
-                        random_index.ind_sample(&mut rng);
+                                random_index.ind_sample(&mut rng);
                     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(one, two, three)));
                     let center1 = center + Vec3::new(0.0, 0.5, 0.0);
 
@@ -240,7 +249,7 @@ fn random_world() -> Node {
         }
         let die1 = Arc::new(material::Dielectric::new(1.5));
         let metal1 = Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
-        let lam = Arc::new(material::Lambertian::new(Vec3::new(0.4,0.2,0.1)));
+        let lam = Arc::new(material::Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
         let sphere = Arc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, die1.clone()));
         world.push(sphere.clone());
 
@@ -250,7 +259,11 @@ fn random_world() -> Node {
         let sphere = Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, metal1.clone()));
         world.push(sphere.clone());
     }
+    let mut hitlist = HitableList::new();
+    for record in &world {
+        hitlist.push(record.clone());
+    }
     let n = Node::new(world, None, None, None);
     n.print("  ".to_string(), None);
-    n
+    (Arc::new(n), Arc::new(hitlist))
 }

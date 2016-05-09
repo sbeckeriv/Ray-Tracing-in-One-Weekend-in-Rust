@@ -91,7 +91,6 @@ impl Camera {
     }
 
     pub fn get_ray(&self, s: &f32, t: &f32) -> Ray {
-
         let mut rng = rand::thread_rng();
         let random_index = Range::new(0.0, 1.0);
 

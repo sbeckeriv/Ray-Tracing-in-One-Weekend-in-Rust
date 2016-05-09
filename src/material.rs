@@ -7,18 +7,20 @@ use ray::Ray;
 use objects::HitRecord;
 use nalgebra::Dot;
 use utils::{random_in_unit_sphere, unit_vector};
-
+use std::fmt::Debug;
 pub trait Reflect{
     fn reflect(&self, v: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
         *v - (*n * v.dot(n) * 2.0)
     }
 }
 
-pub trait Scatter: Send + Sync {
+pub trait Scatter: Send + Sync + Debug{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
 
 // todo make scatter a trait
+//
+#[derive(Debug)]
 pub struct Metal {
     albedo: Vec3<f32>,
     fuzz: f32,
@@ -54,6 +56,7 @@ impl Scatter for Metal {
     }
 }
 
+#[derive(Debug)]
 pub struct Dielectric {
     ref_idx: f32,
 }
@@ -109,6 +112,7 @@ impl Scatter for Dielectric {
     }
 }
 
+#[derive(Debug)]
 pub struct Lambertian {
     albedo: Vec3<f32>,
 }
