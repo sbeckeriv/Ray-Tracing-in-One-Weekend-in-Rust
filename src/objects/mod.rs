@@ -32,13 +32,6 @@ pub trait Hitable: Send + Sync + Debug{
         let results = local.0.x <= max.x && min.x <= local.1.x && local.0.y <= max.y &&
                       min.y <= local.1.y && local.0.z <= max.z &&
                       min.z <= local.1.z;
-        //      let results = (local.0.x <= min.x && local.1.x >= min.x ||
-        //                     local.0.x <= max.x && local.1.x >= min.x) &&
-        //                    (local.0.y <= min.y && local.1.y >= min.y ||
-        //                     local.0.y <= max.y && local.1.y >= min.y) &&
-        //                    (local.0.z <= min.z && local.1.z >= min.z ||
-        //                     local.0.z <= max.z && local.1.z >= min.z);
-        // println!("{:?} :: {:?} :: {:?}", results, local, (min, max));
         results
     }
     fn closer(&self,
@@ -80,26 +73,22 @@ impl HitableList {
         if ray.debug {
             println!("Ray {:?}", ray);
         }
-        if self.list.len() > 0 {
-            let mut closest_so_far = t_max.clone();
-            let mut last_hit: Option<(HitRecord, Arc<Scatter>)> = None;
-            for object in &self.list {
-                if ray.debug {
-                    println!("object {:?}", object);
-                }
-                // println!("Object {:?}", object.bounding_box(*t_min, *t_max));
-                if let Some(record) = object.hit(ray, t_min, &closest_so_far) {
-                    if ray.debug {
-                        println!("hit ");
-                    }
-                    closest_so_far = record.t;
-                    last_hit = Some((record, object.material()));
-                }
+        let mut closest_so_far = t_max.clone();
+        let mut last_hit: Option<(HitRecord, Arc<Scatter>)> = None;
+        for object in &self.list {
+            if ray.debug {
+                println!("object {:?}", object);
             }
-            last_hit
-        } else {
-            None
+            // println!("Object {:?}", object.bounding_box(*t_min, *t_max));
+            if let Some(record) = object.hit(ray, t_min, &closest_so_far) {
+                if ray.debug {
+                    println!("hit ");
+                }
+                closest_so_far = record.t;
+                last_hit = Some((record, object.material()));
+            }
         }
+        last_hit
     }
 }
 pub struct HitRecord {
