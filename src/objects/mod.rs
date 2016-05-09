@@ -6,6 +6,7 @@ use ray::Ray;
 use std::sync::Arc;
 use material::Scatter;
 pub mod sphere;
+pub mod aabb;
 pub mod bvh;
 
 pub enum HitableDirection {
@@ -65,11 +66,11 @@ impl HitableList {
     }
     pub fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<(HitRecord, Arc<Scatter>)> {
         if self.list.len() > 0 {
-            println!("Ray {:?}", ray);
+            //println!("Ray {:?}", ray);
             let mut closest_so_far = t_max.clone();
             let mut last_hit: Option<(HitRecord, Arc<Scatter>)> = None;
             for object in &self.list {
-                println!("Object {:?}", object.bounding_box(*t_min, *t_max));
+                //println!("Object {:?}", object.bounding_box(*t_min, *t_max));
                 if let Some(record) = object.hit(ray, t_min, &closest_so_far) {
                     closest_so_far = record.t;
                     last_hit = Some((record, object.material()));
