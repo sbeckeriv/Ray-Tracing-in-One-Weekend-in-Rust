@@ -35,7 +35,7 @@ fn main() {
 
     for i in 0..frame_count {
         let x_off = i as f32 / 10.0;
-        let camera = book_cam(&image_x, &image_y, x_off);
+        let camera = normal_cam(&image_x, &image_y, x_off, 0.0, 0.0);
         let random_index = Range::new(0.0, 1.0);
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
@@ -190,11 +190,11 @@ fn random_world() -> (Arc<BVHFindHit>, Arc<BVHFindHit>) {
     let random_index = Range::new(0.0, 1.0);
     let random_size_index = Range::new(0.03, 0.55);
     let mut world = Vec::<Arc<Hitable>>::new();
-    let base_mat = Arc::new(material::Lambertian::new(Vec3::new(1.0, 1.0, 1.0)));
+    let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
 
     let metal_base = Arc::new(material::Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.5));
     let sphere = Arc::new(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0),
-                                      1000.1,
+                                      1000.0,
                                       base_mat.clone()));
     world.push(sphere.clone());
     let minus_vec = Vec3::new(4.0, 0.2, 0.0);
