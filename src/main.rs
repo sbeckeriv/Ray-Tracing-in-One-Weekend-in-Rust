@@ -28,7 +28,7 @@ fn main() {
     let frame_count = 1;
     let frame_count_string = format!("{}", frame_count);
     let ns = 200;
-    let (new_world, world) = random_world();
+    let (world, old_world) = random_world();
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
