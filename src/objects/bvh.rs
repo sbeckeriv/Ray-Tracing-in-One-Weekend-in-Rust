@@ -178,7 +178,7 @@ impl Node {
             hitable_count: list.len(),
         };
 
-        if list.len() > 700 && real_depth < 20 && head.min != head.max {
+        if list.len() > 300 && real_depth < 20 && head.min != head.max {
             let mid = (head.min + head.max) / 2.0;
             let (mut min_mid, mut max_mid) = Self::min_values(&head, &mid, real_depth);
 

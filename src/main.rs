@@ -32,8 +32,10 @@ fn main() {
     fs::create_dir_all(format!("move/{}", scene)).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
-
+    let mut world_index = 0;
+    for w in [world, old_world].iter() {
     for i in 0..frame_count {
+        world_index+=1;
         let x_off = i as f32 / 10.0;
         let camera = normal_cam(&image_x, &image_y, x_off, 0.0, 0.0);
         let random_index = Range::new(0.0, 1.0);
@@ -52,7 +54,7 @@ fn main() {
                 if x == 100 && y == 50 {
                     ray.debug = true;
                 }
-                col = col + color(&ray, &world, 0);
+                col = col + color(&ray, &w, 0);
             }
             let base = 255.99;
             col = col / ns as f32;
@@ -62,14 +64,16 @@ fn main() {
         // let jpg_file  = format!("move/scene_{}_{}.jpg", scene, i);
         // let ref mut fout = File::create(&Path::new(&jpg_file)).unwrap();
         // let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::JPEG);
-        let ppm_file = format!("move/{}/scene_{:02$}.ppm",
+        let ppm_file = format!("move/{}/{}_scene_{:03$}.ppm",
                                scene,
+                               world_index,
                                i,
                                frame_count_string.len());
 
         let ref mut fout = File::create(&Path::new(&ppm_file)).unwrap();
         let _ = image::ImageRgb8(imgbuf.clone()).save(fout, image::PPM);
         println!("done {}", ppm_file);
+    }
     }
 }
 
