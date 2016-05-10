@@ -1,7 +1,7 @@
 extern crate nalgebra;
 extern crate nalgebra as na;
-use na::Vec3;
-use na::Absolute;
+use nalgebra::Vec3;
+use nalgebra::Absolute;
 use objects::HitableDirection;
 #[derive(Debug)]
 pub struct Ray {

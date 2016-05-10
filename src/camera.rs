@@ -1,8 +1,7 @@
-extern crate nalgebra;
-extern crate nalgebra as na;
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-use na::Vec3;
+use nalgebra;
+use nalgebra::Vec3;
 use ray::Ray;
 use std::f32;
 use utils::{unit_vector, random_unit_disk};

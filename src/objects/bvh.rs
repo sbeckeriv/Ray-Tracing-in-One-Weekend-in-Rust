@@ -1,6 +1,6 @@
 // base
 // https://gist.github.com/aidanhs/5ac9088ca0f6bdd4a370
-use na::Vec3;
+use nalgebra::Vec3;
 use ray::Ray;
 use utils::{ffmax, ffmin};
 use objects::{aabb, HitableList, Hitable, HitableDirection, BVHFindHit};
@@ -38,10 +38,7 @@ impl BVHFindHit for Node {
         match results {
             HitDirection::Left => self.left.as_ref().unwrap().find_hit(ray, t_min, t_max),
             HitDirection::Right => self.right.as_ref().unwrap().find_hit(ray, t_min, t_max),
-            a @ HitDirection::Miss | a @ HitDirection::None => {
-                // println!("{:?}", a);
-                HitableList::new()
-            }
+            a @ HitDirection::Miss | a @ HitDirection::None => HitableList::new(),
             HitDirection::End => {
                 if ray.debug {
                     println!("END {:?} {:?}",
@@ -86,7 +83,6 @@ impl Node {
                 if self.left.is_none() && self.right.is_none() {
                     HitDirection::End
                 } else {
-
                     let hl = self.left
                                  .as_ref()
                                  .map_or(Hits::None, |n| n.in_bounding_box(ray, t_min, t_max));
@@ -178,7 +174,7 @@ impl Node {
             hitable_count: list.len(),
         };
 
-        if list.len() > 300 && real_depth < 20 && head.min != head.max {
+        if list.len() > 1 && real_depth < 20 && head.min != head.max {
             let mid = (head.min + head.max) / 2.0;
             let (mut min_mid, mut max_mid) = Self::min_values(&head, &mid, real_depth);
 
@@ -224,8 +220,8 @@ impl Node {
 
         } else {
             let mut hitlist = HitableList::new();
-            for record in list.clone() {
-                hitlist.push(record);
+            for record in &list {
+                hitlist.push(record.clone());
             }
             head.hitlist = Some(hitlist);//lazy clone. might need lifetimes later.
         }

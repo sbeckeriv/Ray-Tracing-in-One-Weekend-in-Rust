@@ -1,7 +1,5 @@
 extern crate nalgebra;
-extern crate nalgebra as na;
-use na::Vec3;
-use na::Absolute;
+use nalgebra::{Vec3,Absolute};
 use ray::Ray;
 use std::sync::Arc;
 use material::Scatter;

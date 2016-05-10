@@ -1,11 +1,10 @@
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
 extern crate nalgebra;
-extern crate nalgebra as na;
-use na::Vec3;
+use nalgebra::Vec3;
+use nalgebra::Dot;
 use ray::Ray;
 use objects::HitRecord;
-use nalgebra::Dot;
 use utils::{random_in_unit_sphere, unit_vector};
 use std::fmt::Debug;
 pub trait Reflect{
@@ -47,9 +46,9 @@ impl Scatter for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let unit_directon = unit_vector(&r_in.direction);
         let reflected = self.reflect(&unit_directon, &rec.normal);
-        let scarttered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz, 0.0);
-        if scarttered.direction.dot(&rec.normal) > 0.0 {
-            Some((self.albedo, scarttered))
+        let scattered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz, 0.0);
+        if scattered.direction.dot(&rec.normal) > 0.0 {
+            Some((self.albedo, scattered))
         } else {
             None
         }

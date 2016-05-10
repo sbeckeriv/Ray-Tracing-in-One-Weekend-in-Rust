@@ -1,9 +1,7 @@
-extern crate nalgebra;
-extern crate nalgebra as na;
-use na::Vec3;
+use nalgebra::Vec3;
+use nalgebra::Dot;
 use ray::Ray;
 use std::sync::Arc;
-use nalgebra::Dot;
 use material::Scatter;
 use objects::{HitRecord, Hitable};
 #[derive(Debug)]
@@ -117,11 +115,11 @@ impl Hitable for Sphere {
         let direction = ray.direction;
         let oc = origin - self.center;
         let a = direction.dot(&direction);
-        let b = 2.0 * oc.dot(&direction);
+        let b = oc.dot(&direction);
         let c = oc.dot(&oc) - self.radius * self.radius;
-        let discriminate = b * b - 4.0 * a * c;
+        let discriminate = b * b - a * c;
         if ray.debug {
-            println!("discriminate {}", discriminate)
+            println!("discriminate {} a {} b {} c {}", discriminate, a, b, c)
         }
         // clean up the crazy tree.
         if discriminate < 0.0 {
