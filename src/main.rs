@@ -18,7 +18,7 @@ use objects::{Hitable, BVHFindHit, HitableList, sphere};
 use objects::bvh::Node;
 use objects::sphere::{MovingSphere, Sphere};
 mod camera;
-use camera::Camera;
+use camera::{normal_cam, normal_cam2, book_cam, head_on_cam};
 mod material;
 use std::fs;
 
@@ -105,66 +105,4 @@ fn color(ray: &Ray, world: &Arc<BVHFindHit>, depth: usize) -> Vec3<f32> {
             Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
         }
     }
-}
-fn book_cam(image_x: &u32, image_y: &u32, offset: f32) -> Camera {
-    let look_from = Vec3::new(13.0, 3.0, -3.0);
-    let look_at = Vec3::new(0.0, -4.0, 0.0);
-    let distance = 10.0;
-    let aperture = 0.0;
-    Camera::new_focus(look_from,
-                      look_at,
-                      Vec3::new(0.0, 1.0, 0.0),
-                      20.0,
-                      *image_x as f32 / *image_y as f32,
-                      aperture,
-                      distance,
-                      0.0,
-                      1.0)
-}
-fn normal_cam2(image_x: &u32,
-               image_y: &u32,
-               offset_x: f32,
-               offset_y: f32,
-               offset_z: f32)
-               -> Camera {
-    let look_from = Vec3::new(3.0 + offset_x, 3.0 + offset_y, 2.0 + offset_z);
-    let look_at = Vec3::new(0.0, 0.0, 0.0 - 1.0);
-    let distance = (look_from - look_at).len() as f32;
-    let aperture = 0.0;
-    Camera::new_focus(look_from,
-                      look_at,
-                      Vec3::new(0.0, 1.0, 0.0),
-                      20.0,
-                      *image_x as f32 / *image_y as f32,
-                      aperture,
-                      distance,
-                      0.0,
-                      0.0)
-}
-
-fn head_on_cam(image_x: &u32,
-               image_y: &u32,
-               offset_x: f32,
-               offset_y: f32,
-               offset_z: f32)
-               -> Camera {
-    Camera::new_set()
-}
-
-fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
-    let look_from = Vec3::new(13.0, 2.0 + offset_y, 3.0 + offset_z);
-    let look_at = Vec3::new(0.0 + offset_x, 0.0, 0.0);
-
-    let distance = 10.0;
-    let aperture = 0.0;
-    Camera::new_focus(look_from,
-                      look_at,
-                      Vec3::new(0.0, 1.0, 0.0),
-                      20.0,
-                      *image_x as f32 / *image_y as f32,
-                      aperture,
-                      distance,
-                      0.0,
-                      1.0)
-
 }
