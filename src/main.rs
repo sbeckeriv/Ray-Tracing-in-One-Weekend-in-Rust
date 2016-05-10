@@ -37,12 +37,12 @@ fn main() {
     for w in [world, old_world].iter() {
         for i in 0..frame_count {
             world_index += 1;
-            let x_off = i as f32 / 10.0;
+            //let x_off = i as f32 / 10.0;
             let camera = normal_cam(&image_x, &image_y, 1.0, 2.0, 4.0);
             let random_index = Range::new(0.0, 1.0);
             // Create a new ImgBuf with width: imgx and height: imgy
             let mut imgbuf: image::RgbImage = image::ImageBuffer::new(image_x, image_y);
-            let mut pool = simple_parallel::Pool::new(8);
+            let mut pool = simple_parallel::Pool::new(1);
             pool.for_(imgbuf.enumerate_pixels_mut(), |(x, y, pixel)| {
                 let mut rng = rand::thread_rng();
                 let mut col = Vec3::new(0.0, 0.0, 0.0);

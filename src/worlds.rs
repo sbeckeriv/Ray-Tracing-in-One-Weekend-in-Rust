@@ -7,6 +7,7 @@ use objects;
 use objects::{Hitable, BVHFindHit, HitableList, sphere};
 use objects::bvh::Node;
 use objects::sphere::{MovingSphere, Sphere};
+
 pub fn three_world() -> (Arc<BVHFindHit>, Arc<BVHFindHit>) {
     let mut world = Vec::<Arc<Hitable>>::new();
     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));

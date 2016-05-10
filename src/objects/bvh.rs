@@ -133,7 +133,7 @@ impl Node {
 
     // http://stackoverflow.com/questions/4965335/how-to-print-binary-tree-diagram
     pub fn print(&self, prefix: String, is_tail: Option<()>) {
-        let tail = is_tail.as_ref().map_or("  ├── ", |c| "  └── ");
+        let tail = is_tail.as_ref().map_or("  ├── ", |_| "  └── ");
         let hit_list = self.hitlist
                            .as_ref()
                            .map_or("".to_string(), |c| format!("{}", c.list.len()));
@@ -143,13 +143,13 @@ impl Node {
                  (self.min, self.max),
                  self.hitable_count,
                  hit_list);
-        let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |c| "      "));
+        let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |_| "      "));
         if self.left.is_some() {
             self.left
                 .as_ref()
                 .map(|n| n.print(child_tail, self.right.as_ref().map_or(Some(()), |v| None)));
         }
-        let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |c| "      "));
+        let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |_| "      "));
         if self.right.is_some() {
             self.right.as_ref().map(|n| n.print(child_tail, Some(())));
         }
@@ -176,7 +176,7 @@ impl Node {
 
         if list.len() > 1 && real_depth < 20 && head.min != head.max {
             let mid = (head.min + head.max) / 2.0;
-            let (mut min_mid, mut max_mid) = Self::min_values(&head, &mid, real_depth);
+            let (min_mid, max_mid) = Self::min_values(&head, &mid, real_depth);
 
             let (left, right): (Vec<Arc<Hitable>>, Vec<Arc<Hitable>>) =
                 list.into_iter().partition(|n| {
