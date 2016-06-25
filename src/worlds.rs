@@ -42,7 +42,7 @@ pub fn corner_world() -> (Arc<BVHFindHit>, Arc<BVHFindHit>) {
     let sphere = Arc::new(Sphere::new(Vec3::new(0.0, (0.0 - 1000.0), 0.0),
                                       1000.0,
                                       base_mat.clone()));
-    world.push(sphere.clone());
+//    world.push(sphere.clone());
     let metal1 = Arc::new(material::Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
     let base_mat = Arc::new(material::Lambertian::new(Vec3::new(0.9, 0.0, 0.0)));
     let lam = Arc::new(material::Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));

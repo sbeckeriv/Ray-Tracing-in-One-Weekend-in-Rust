@@ -2,6 +2,7 @@ extern crate image;
 extern crate nalgebra ;
 extern crate simple_parallel;
 extern crate rand;
+extern crate flame;
 use rand::distributions::{IndependentSample, Range};
 use nalgebra::Vec3;
 use std::sync::Arc;
@@ -23,6 +24,7 @@ mod material;
 use std::fs;
 
 fn main() {
+    flame::start("main");
     let scene = 20;
     let image_x = 200;
     let image_y = 100;
@@ -52,7 +54,7 @@ fn main() {
                     let u = (x as f32 + rand_x) / image_x as f32;
                     let v = ((image_y - 1 - y) as f32 + rand_y) / image_y as f32;
                     let mut ray = camera.get_ray(&u, &v);
-                    if x == 126 && y == 50 {
+                    if x == 150 && y == 48 {
                         ray.debug = true;
                     }
                     col = col + color(&ray, &w, 0);
@@ -78,6 +80,10 @@ fn main() {
             println!("done {}", ppm_file);
         }
     }
+
+    flame::end("main");
+    flame::dump_html(&mut File::create("flame-graph.html").unwrap()).unwrap();
+
 }
 
 fn color(ray: &Ray, world: &Arc<BVHFindHit>, depth: usize) -> Vec3<f32> {

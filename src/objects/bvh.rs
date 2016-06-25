@@ -28,12 +28,13 @@ pub struct Node {
     pub right: Option<Box<Node>>,
     pub hitlist: Option<HitableList>,
     pub hitable_count: usize,
+    pub name: String,
 }
 impl BVHFindHit for Node {
     fn find_hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> HitableList {
         let results = self.hits(ray, t_min, t_max);
         if ray.debug {
-            println!("{:?} {:?}", ray, results);
+            println!("{:?} results {:?}", ray, results);
         }
         match results {
             HitDirection::Left => self.left.as_ref().unwrap().find_hit(ray, t_min, t_max),
@@ -41,6 +42,7 @@ impl BVHFindHit for Node {
             a @ HitDirection::Miss | a @ HitDirection::None => HitableList::new(),
             HitDirection::End => {
                 if ray.debug {
+                    self.print("".to_string(), None);
                     println!("END {:?} {:?}",
                              self.bounding_box(0.0, 0.0),
                              self.hitlist.as_ref().unwrap().list.len());
@@ -137,10 +139,11 @@ impl Node {
         let hit_list = self.hitlist
                            .as_ref()
                            .map_or("".to_string(), |c| format!("{}", c.list.len()));
-        println!("{}{} {:?} total::{} {}",
+        println!("{}{} {:?} {} total::{} {}",
                  prefix,
                  tail,
                  (self.min, self.max),
+                 self.name,
                  self.hitable_count,
                  hit_list);
         let child_tail = format!("{}{}", prefix, is_tail.map_or("  │   ", |_| "      "));
@@ -172,6 +175,7 @@ impl Node {
             right: None,
             hitlist: None,
             hitable_count: list.len(),
+            name: format!("{}", real_depth),
         };
 
         if list.len() > 1 && real_depth < 20 && head.min != head.max {
@@ -217,7 +221,6 @@ impl Node {
                 let right_boxed = Some(Box::new(right));
                 head.right = right_boxed;
             }
-
         } else {
             let mut hitlist = HitableList::new();
             for record in &list {
