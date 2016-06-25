@@ -1,24 +1,25 @@
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
 extern crate nalgebra;
-extern crate nalgebra as na;
-use na::Vec3;
+use nalgebra::Vec3;
+use nalgebra::Dot;
 use ray::Ray;
 use objects::HitRecord;
-use nalgebra::Dot;
 use utils::{random_in_unit_sphere, unit_vector};
-
+use std::fmt::Debug;
 pub trait Reflect{
     fn reflect(&self, v: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
         *v - (*n * v.dot(n) * 2.0)
     }
 }
 
-pub trait Scatter: Send + Sync {
+pub trait Scatter: Send + Sync + Debug{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)>;
 }
 
 // todo make scatter a trait
+//
+#[derive(Debug)]
 pub struct Metal {
     albedo: Vec3<f32>,
     fuzz: f32,
@@ -45,15 +46,16 @@ impl Scatter for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Vec3<f32>, Ray)> {
         let unit_directon = unit_vector(&r_in.direction);
         let reflected = self.reflect(&unit_directon, &rec.normal);
-        let scarttered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz, 0.0);
-        if scarttered.direction.dot(&rec.normal) > 0.0 {
-            Some((self.albedo, scarttered))
+        let scattered = Ray::new(rec.p, reflected + random_in_unit_sphere() * self.fuzz, 0.0);
+        if scattered.direction.dot(&rec.normal) > 0.0 {
+            Some((self.albedo, scattered))
         } else {
             None
         }
     }
 }
 
+#[derive(Debug)]
 pub struct Dielectric {
     ref_idx: f32,
 }
@@ -109,6 +111,7 @@ impl Scatter for Dielectric {
     }
 }
 
+#[derive(Debug)]
 pub struct Lambertian {
     albedo: Vec3<f32>,
 }

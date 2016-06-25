@@ -1,8 +1,7 @@
-extern crate nalgebra;
-extern crate nalgebra as na;
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-use na::Vec3;
+use nalgebra;
+use nalgebra::Vec3;
 use ray::Ray;
 use std::f32;
 use utils::{unit_vector, random_unit_disk};
@@ -20,6 +19,68 @@ pub struct Camera {
     pub time1: f32,
 }
 
+pub fn book_cam(image_x: &u32, image_y: &u32, offset: f32) -> Camera {
+    let look_from = Vec3::new(13.0, 3.0, -3.0);
+    let look_at = Vec3::new(0.0, -4.0, 0.0);
+    let distance = 10.0;
+    let aperture = 0.0;
+    Camera::new_focus(look_from,
+                      look_at,
+                      Vec3::new(0.0, 1.0, 0.0),
+                      20.0,
+                      *image_x as f32 / *image_y as f32,
+                      aperture,
+                      distance,
+                      0.0,
+                      1.0)
+}
+pub fn normal_cam2(image_x: &u32,
+               image_y: &u32,
+               offset_x: f32,
+               offset_y: f32,
+               offset_z: f32)
+               -> Camera {
+    let look_from = Vec3::new(3.0 + offset_x, 3.0 + offset_y, 2.0 + offset_z);
+    let look_at = Vec3::new(0.0, 0.0, 0.0 - 1.0);
+    let distance = (look_from - look_at).len() as f32;
+    let aperture = 0.0;
+    Camera::new_focus(look_from,
+                      look_at,
+                      Vec3::new(0.0, 1.0, 0.0),
+                      20.0,
+                      *image_x as f32 / *image_y as f32,
+                      aperture,
+                      distance,
+                      0.0,
+                      0.0)
+}
+
+pub fn head_on_cam(image_x: &u32,
+               image_y: &u32,
+               offset_x: f32,
+               offset_y: f32,
+               offset_z: f32)
+               -> Camera {
+    Camera::new_set()
+}
+
+pub fn normal_cam(image_x: &u32, image_y: &u32, offset_x: f32, offset_y: f32, offset_z: f32) -> Camera {
+    let look_from = Vec3::new(13.0, 2.0 + offset_y, 3.0 + offset_z);
+    let look_at = Vec3::new(0.0 + offset_x, 0.0, 0.0);
+
+    let distance = 10.0;
+    let aperture = 0.0;
+    Camera::new_focus(look_from,
+                      look_at,
+                      Vec3::new(0.0, 1.0, 0.0),
+                      20.0,
+                      *image_x as f32 / *image_y as f32,
+                      aperture,
+                      distance,
+                      0.0,
+                      1.0)
+
+}
 impl Camera {
     pub fn new_set() -> Self {
 
@@ -91,7 +152,6 @@ impl Camera {
     }
 
     pub fn get_ray(&self, s: &f32, t: &f32) -> Ray {
-
         let mut rng = rand::thread_rng();
         let random_index = Range::new(0.0, 1.0);
 

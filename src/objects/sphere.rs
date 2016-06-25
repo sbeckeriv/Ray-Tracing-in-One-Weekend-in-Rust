@@ -1,11 +1,10 @@
-extern crate nalgebra;
-extern crate nalgebra as na;
-use na::Vec3;
+use nalgebra::Vec3;
+use nalgebra::Dot;
 use ray::Ray;
 use std::sync::Arc;
-use nalgebra::Dot;
 use material::Scatter;
 use objects::{HitRecord, Hitable};
+#[derive(Debug)]
 pub struct MovingSphere {
     pub center0: Vec3<f32>,
     pub center1: Vec3<f32>,
@@ -37,7 +36,11 @@ impl MovingSphere {
         (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
     }
 }
-
+// impl Ord for MovingSphere{
+//    fn cmp(&self, other: &Self) -> Ordering{
+//        self.bounding_box.0 < other.bounding_box.0
+//    }
+// }
 impl Hitable for MovingSphere {
     fn material(&self) -> Arc<Scatter> {
         self.material.clone()
@@ -73,8 +76,13 @@ impl Hitable for MovingSphere {
         };
         return_value
     }
+    fn bounding_box(&self, t0: f32, t1: f32) -> (Vec3<f32>, Vec3<f32>) {
+        let one = self.center0 - Vec3::new(self.radius, self.radius, self.radius);
+        let two = self.center0 + Vec3::new(self.radius, self.radius, self.radius);
+        (one, two)
+    }
 }
-
+#[derive(Debug)]
 pub struct Sphere {
     pub center: Vec3<f32>,
     pub radius: f32,
@@ -90,18 +98,29 @@ impl Sphere {
         }
     }
 }
+
 impl Hitable for Sphere {
     fn material(&self) -> Arc<Scatter> {
         self.material.clone()
     }
+
+    fn bounding_box(&self, t0: f32, t1: f32) -> (Vec3<f32>, Vec3<f32>) {
+        let one = self.center - Vec3::new(self.radius, self.radius, self.radius);
+        let two = self.center + Vec3::new(self.radius, self.radius, self.radius);
+        (one, two)
+    }
+
     fn hit(&self, ray: &Ray, t_min: &f32, t_max: &f32) -> Option<HitRecord> {
         let origin = ray.origin;
         let direction = ray.direction;
         let oc = origin - self.center;
         let a = direction.dot(&direction);
-        let b = 2.0 * oc.dot(&direction);
+        let b = oc.dot(&direction);
         let c = oc.dot(&oc) - self.radius * self.radius;
-        let discriminate = b * b - 4.0 * a * c;
+        let discriminate = b * b - a * c;
+        if ray.debug {
+            println!("discriminate {} a {} b {} c {}", discriminate, a, b, c)
+        }
         // clean up the crazy tree.
         if discriminate < 0.0 {
             None
@@ -111,6 +130,13 @@ impl Hitable for Sphere {
             // calculating pos most of the time is a waste?
             let temp_pos = (0.0 - b + ds) / (2.0 * a);
             // is it wasteful to use an option to dedup code?
+            if ray.debug {
+                println!("temp neg {} t_min {} temp_pos {} t_max{}",
+                         temp_neg,
+                         t_min,
+                         temp_pos,
+                         t_max)
+            }
             let temp = if temp_neg < *t_max && temp_neg > *t_min {
                 Some(temp_neg)
             } else if temp_pos < *t_max && temp_pos > *t_min {
@@ -118,6 +144,9 @@ impl Hitable for Sphere {
             } else {
                 None
             };
+            if ray.debug {
+                println!("temp results {:?}", temp)
+            }
 
             match temp {
                 Some(temp) => {

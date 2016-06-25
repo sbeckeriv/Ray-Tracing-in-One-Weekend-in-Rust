@@ -1,10 +1,22 @@
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
-extern crate nalgebra;
-extern crate nalgebra as na;
-use na::Vec3;
+use nalgebra::Vec3;
 use nalgebra::Dot;
+pub fn ffmax(a: f32, b: f32) -> f32 {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
 
+pub fn ffmin(a: f32, b: f32) -> f32 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
 pub fn unit_vector(vec: &Vec3<f32>) -> Vec3<f32> {
     let len = vec.len() as f32;
     Vec3::new(vec.x / len, vec.y / len, vec.z / len)
